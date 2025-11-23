@@ -15,6 +15,7 @@ class MambaConfig:
     pad_vocab_size_multiple: int = 8
     conv_bias: bool = True
     bias: bool = False
+    vocab_size: int = None
 
 class MambaBlock(nn.Module):
     def __init__(self, config: MambaConfig):
@@ -99,7 +100,7 @@ class MambaBlock(nn.Module):
         
         for t in range(seq_len):
             h = dA[:, t] * h + dB[:, t] * u[:, t].unsqueeze(-1)
-            y_t = torch.sum(h * C[:, t].unsqueeze(2), dim=-1) # (B, d_inner)
+            y_t = torch.sum(h * C[:, t].unsqueeze(1), dim=-1) # (B, d_inner)
             ys.append(y_t)
             
         y = torch.stack(ys, dim=1) # (B, L, d_inner)
@@ -110,11 +111,18 @@ class Mamba(nn.Module):
     def __init__(self, config: MambaConfig):
         super().__init__()
         self.config = config
+        
+        if config.vocab_size is not None:
+            self.embedding = nn.Linear(config.vocab_size, config.d_model)
+        
         self.layers = nn.ModuleList([MambaBlock(config) for _ in range(config.n_layer)])
         self.norm_f = nn.LayerNorm(config.d_model)
 
     def forward(self, x):
-        # x: (B, L, D)
+        # x: (B, L, D) or (B, L, vocab_size)
+        if hasattr(self, 'embedding'):
+            x = self.embedding(x)
+            
         for layer in self.layers:
             x = x + layer(x)
         x = self.norm_f(x)

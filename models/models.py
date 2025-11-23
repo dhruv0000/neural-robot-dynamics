@@ -114,6 +114,7 @@ class ModelMixedInput(nn.Module):
                 n_layer=network_cfg['transformer']['n_layer'],
                 d_state=16, # Default
                 expand=2,   # Default
+                vocab_size=self.feature_dim,
             )
             self.mamba_model = Mamba(mamba_cfg)
             self.mamba_model.to(self.device)

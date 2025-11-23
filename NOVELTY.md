@@ -23,6 +23,9 @@ I added a pure PyTorch implementation of the Mamba (S6) block in
 models/mamba.py
 . This allows experimenting with SSMs without needing complex CUDA kernels (though it will be slower than optimized versions).
 
+> [!NOTE]
+> **Implementation Detail:** Unlike the standard Mamba implementation which often assumes inputs are already embedded, this implementation includes an internal linear projection layer (`self.embedding`) to map the input feature dimension (e.g., state size) to the model's hidden dimension (`d_model`). This mirrors the behavior of the GPT implementation's `wte` layer, ensuring compatibility with the rest of the training pipeline.
+
 File: 
 models/mamba.py
 Usage: Use --novelty mamba in the training CLI.
