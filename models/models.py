@@ -225,6 +225,9 @@ class ModelMixedInput(nn.Module):
 
         if self.is_transformer:
             features = self.transformer_model(features)
+            
+        if self.is_mamba:
+            features = self.mamba_model(features)
                     
         output = self.model(features, deterministic = deterministic)
 
