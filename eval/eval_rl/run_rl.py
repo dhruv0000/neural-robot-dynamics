@@ -26,6 +26,13 @@ wp.config.verify_cuda = True
 
 import argparse
 import torch
+# Monkeypatch torch.load to default weights_only=False for rl_games compatibility
+_original_torch_load = torch.load
+def _safe_torch_load(*args, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _original_torch_load(*args, **kwargs)
+torch.load = _safe_torch_load
 import yaml
 from rl_games.torch_runner import Runner
 
@@ -170,7 +177,8 @@ def construct_env(env_specs, device, args):
         
     # Load neural model and neural_integrator_cfg if env_mode is "neural"
     if env_specs['env_mode'] == "neural":
-        neural_model, robot_name = torch.load(env_specs['model_path'], map_location=device)
+        # Set weights_only=False to allow loading custom classes like ModelMixedInput
+        neural_model, robot_name = torch.load(env_specs['model_path'], map_location=device, weights_only=False)
         neural_model.to(device)
 
         train_dir = os.path.abspath(
