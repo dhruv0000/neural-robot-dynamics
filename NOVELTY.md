@@ -1,5 +1,3 @@
-Based on the current state of the NeRD paper and related research in 2024-2025, here are five specific, high-value ways you can add novelty to this replication. These range from architectural upgrades to expanding the physical scope.
-
 ### 1. Architectural Upgrade: Replace GPT-2 with Mamba (SSM)
 The original paper uses a "lightweight GPT-2" (Transformer). While effective, Transformers have quadratic complexity with sequence length and can be computationally heavy for real-time simulation.
 * **The Novelty:** Replace the causal Transformer with a **State Space Model (SSM)** like **Mamba** or **Mamba-2**.
