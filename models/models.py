@@ -62,7 +62,8 @@ class ModelMixedInput(nn.Module):
         output_dim,
         input_cfg,
         network_cfg,
-        device = 'cuda:0'
+        device = 'cuda:0',
+        novelty = None
     ):
         
         super().__init__()
