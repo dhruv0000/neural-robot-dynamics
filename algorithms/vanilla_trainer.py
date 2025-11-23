@@ -49,8 +49,10 @@ class VanillaTrainer:
         neural_env: NeuralEnvironment, 
         cfg: dict, 
         model_checkpoint_path: Optional[str] = None, 
-        device = 'cuda:0'
+        device = 'cuda:0',
+        novelty: Optional[str] = None
     ):
+        self.novelty = novelty
     
         algo_cfg = cfg['algorithm']
         cli_cfg = cfg['cli']
@@ -80,7 +82,8 @@ class VanillaTrainer:
                 output_dim = self.neural_integrator.prediction_dim,
                 input_cfg = cfg['inputs'],
                 network_cfg = cfg['network'],
-                device = self.device
+                device = self.device,
+                novelty = self.novelty
             )
         else:
             checkpoint = torch.load(model_checkpoint_path, map_location=self.device)
@@ -302,6 +305,8 @@ class VanillaTrainer:
         return data
 
     def compute_loss(self, data, train):
+        if self.novelty == 'unroll':
+            return self.compute_loss_unroll(data, train)
 
         if self.neural_model.is_rnn:
             self.neural_model.init_rnn(self.batch_size)
@@ -350,6 +355,150 @@ class VanillaTrainer:
                 dim = -1
             ).mean()
 
+        return loss, loss_itemized
+        
+    def compute_loss_unroll(self, data, train):
+        # Unrolling logic for temporal stability
+        # We assume data['states'] has shape (B, T, D)
+        # We will unroll for the length of the sequence
+        
+        if self.neural_model.is_rnn:
+            self.neural_model.init_rnn(self.batch_size)
+            
+        # Initial state
+        current_state = data['states'][:, 0, :] # (B, D)
+        # We need to construct the input for the first step
+        # But wait, the model takes (B, T, input_dim) or (B, input_dim)
+        # And 'data' contains pre-processed inputs like 'contact_masks' etc.
+        # This is tricky because 'data' is already a batch of sequences.
+        
+        # For unrolling, we need to step the environment or at least the neural integrator
+        # The neural integrator helper functions are stateless mostly.
+        
+        # Let's simplify: We will use the ground truth controls and other inputs
+        # but feed back the predicted state.
+        
+        # data['states']: (B, T, state_dim)
+        # data['next_states']: (B, T, state_dim)
+        
+        B, T, _ = data['states'].shape
+        
+        predicted_states_list = []
+        
+        # We need to reconstruct the input dict for each step
+        # The 'data' dict has keys with shape (B, T, ...)
+        
+        # This is a bit complex because we need to slice all inputs
+        # and potentially re-compute things that depend on state (like contact masks? no, those depend on depth)
+        # Contact depths/normals are inputs, so we assume they are given (open loop contact)
+        # or we need a contact model. The paper says "NeRD uniquely replaces the low-level dynamics and contact solvers"
+        # but the inputs include contact info. 
+        # If we just unroll dynamics, we assume contact info is provided for the trajectory (e.g. from planning or ground truth)
+        
+        loss = 0
+        
+        # Initialize hidden state for RNN/Mamba if needed
+        # For Transformer/Mamba, we usually feed the whole sequence.
+        # But for 'unroll', we want autoregressive generation during training.
+        
+        # Actually, for Mamba/Transformer, we can just feed the sequence of *predicted* states
+        # mixed with ground truth actions/contacts.
+        
+        # Let's do a loop
+        curr_state = data['states'][:, 0:1, :] # (B, 1, D)
+        
+        all_predicted_next_states = []
+        
+        for t in range(T):
+            # Construct input for step t
+            step_data = {}
+            for key in data:
+                if isinstance(data[key], torch.Tensor) and data[key].shape[1] == T:
+                     step_data[key] = data[key][:, t:t+1, ...]
+                else:
+                    step_data[key] = data[key]
+            
+            # OVERWRITE state with current prediction (except for t=0 where it is GT)
+            if t > 0:
+                step_data['states'] = curr_state
+            
+            # Predict
+            # model forward expects (B, T, input_dim)
+            # We are doing T=1
+            
+            # We need to make sure the model handles state history if needed.
+            # The 'ModelMixedInput' extracts features.
+            # If it's a sequence model, it expects a sequence.
+            # If we pass T=1, it treats it as a sequence of length 1.
+            # For RNN, hidden state is preserved.
+            # For Transformer/Mamba, we need to pass history? 
+            # The current implementation of 'forward' in ModelMixedInput seems to support T steps.
+            
+            # If we are unrolling, we are essentially doing what 'evaluate' does but with gradient.
+            
+            # However, the Transformer/Mamba implementation in 'models.py' 
+            # resets/processes the whole sequence at once in 'forward'.
+            # It doesn't seem to support autoregressive stepping with state caching easily 
+            # without changing the model code significantly (KV cache etc).
+            
+            # simplified unroll: 
+            # 1. Pass GT inputs for t=0, get pred_state_1
+            # 2. Pass pred_state_1 + GT inputs for t=1, get pred_state_2
+            # ...
+            # This is slow (O(T^2) for transformer if we re-process history, or O(T) if we just step).
+            # But 'forward' processes the whole chunk.
+            
+            # If we want to support unrolling for Transformer/Mamba, we should probably 
+            # just implement it for the "next step" prediction using the *current* state 
+            # and *past* context.
+            
+            # But wait, the 'TransformerNeuralIntegrator' usually takes 'num_states_history'.
+            # If we are just doing 1-step prediction, the model handles the history internally?
+            # No, 'states' input to model is usually just current state?
+            # Let's check 'TransformerNeuralIntegrator'.
+            
+            # In 'vanilla_trainer.py', 'process_neural_model_inputs' is called.
+            # It prepares 'states', 'contact_depths' etc.
+            
+            # If we want to do unrolling properly with this codebase, it might be involved.
+            # Let's implement a simpler version:
+            # We will use the model to predict the *entire sequence* but we will 
+            # try to feed the *predicted* states back in.
+            # But the model architecture (GPT/Mamba) takes the whole sequence of states as input
+            # and outputs the whole sequence of next states (shifted).
+            # If we want to unroll, we can't parallelize.
+            
+            # Alternative "Push-forward" implementation:
+            # We can't easily do full unrolling for Transformer/Mamba without a loop.
+            # Let's do a loop of size 'sample_sequence_length'.
+            
+            prediction = self.neural_model(step_data) # (B, 1, out_dim)
+            
+            # Convert prediction to next state
+            pred_next_state = self.neural_integrator.convert_prediction_to_next_states(
+                states = step_data['states'],
+                prediction = prediction
+            )
+            self.neural_integrator.wrap2PI(pred_next_state)
+            
+            all_predicted_next_states.append(pred_next_state)
+            
+            curr_state = pred_next_state
+            
+        # Stack predictions
+        all_predicted_next_states = torch.cat(all_predicted_next_states, dim=1) # (B, T, D)
+        
+        # Compute loss against GT next states
+        # data['next_states'] is (B, T, D)
+        
+        loss = torch.nn.MSELoss()(
+            all_predicted_next_states,
+            data['next_states']
+        )
+        
+        loss_itemized = {}
+        loss_itemized['state_MSE'] = loss
+        
         return loss, loss_itemized
         
     def one_epoch(

@@ -33,6 +33,10 @@ from envs.neural_environment import NeuralEnvironment
 def add_additional_params(parser):
     parser.add_argument(
         '--cfg-overrides', default="", type=str)
+    parser.add_argument(
+        '--novelty', default=None, choices=['mamba', 'unroll'], type=str)
+    parser.add_argument(
+        '--sample-sequence-length', default=None, type=int)
     return parser
 
 if __name__ == '__main__':
@@ -61,6 +65,9 @@ if __name__ == '__main__':
     # cfg parameter overwrite
     if args.num_envs is not None:
         cfg['env']['num_envs'] = args.num_envs
+        
+    if args.sample_sequence_length is not None:
+        cfg['algorithm']['sample_sequence_length'] = args.sample_sequence_length
 
     cfg['env']['render'] = args.render
     
@@ -98,7 +105,8 @@ if __name__ == '__main__':
             neural_env=neural_env,
             model_checkpoint_path=args.checkpoint,
             cfg=cfg,
-            device=args.device
+            device=args.device,
+            novelty=args.novelty
         )
     elif algorithm_name == 'SequenceModelTrainer':
         # some sanity check for the consistency of config file
@@ -127,7 +135,8 @@ if __name__ == '__main__':
             neural_env=neural_env,
             model_checkpoint_path=args.checkpoint,
             cfg=cfg,
-            device=args.device
+            device=args.device,
+            novelty=args.novelty
         )
     else:
         raise NotImplementedError(f'Algorithm {algorithm_name} not recognized')

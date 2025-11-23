@@ -26,10 +26,11 @@ class SequenceModelTrainer(VanillaTrainer):
         neural_env,
         cfg,
         model_checkpoint_path=None,
-        device='cuda:0'
+        device='cuda:0',
+        novelty=None
     ):
         self.sample_sequence_length = cfg['algorithm'].get('sample_sequence_length', 1)
-        super().__init__(neural_env, cfg, model_checkpoint_path, device)
+        super().__init__(neural_env, cfg, model_checkpoint_path, device, novelty)
     
     def get_datasets(self, train_dataset_path, valid_datasets_cfg):
         self.train_dataset = TrajectoryDataset(

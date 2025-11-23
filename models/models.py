@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 from models.base_models import MLPBase, LSTMBase, GRUBase
 from models.model_transformer import GPT, GPTConfig
+from models.mamba import Mamba, MambaConfig
 from utils.running_mean_std import RunningMeanStd
 
 class MLPDeterministic(nn.Module):
@@ -102,7 +103,23 @@ class ModelMixedInput(nn.Module):
             self.is_rnn = False
             self.rnn = None
 
-        if "transformer" in network_cfg:
+        if novelty == 'mamba':
+            self.is_transformer = False
+            self.transformer_model = None
+            
+            # Use transformer config for mamba for now, or add specific mamba config
+            mamba_cfg = MambaConfig(
+                d_model=network_cfg['transformer']['n_embd'],
+                n_layer=network_cfg['transformer']['n_layer'],
+                d_state=16, # Default
+                expand=2,   # Default
+            )
+            self.mamba_model = Mamba(mamba_cfg)
+            self.mamba_model.to(self.device)
+            self.is_mamba = True
+            self.feature_dim = mamba_cfg.d_model
+            
+        elif "transformer" in network_cfg:
             model_args = dict(
                 n_layer=network_cfg['transformer']['n_layer'],
                 n_head=network_cfg['transformer']['n_head'],
@@ -119,9 +136,11 @@ class ModelMixedInput(nn.Module):
 
             self.is_transformer = True
             self.feature_dim = self.transformer_model.config.n_embd
+            self.is_mamba = False
         else:
             self.is_transformer = False
             self.transformer_model = None
+            self.is_mamba = False
 
         if self.model is None:
             self.model = MLPDeterministic(
@@ -234,6 +253,9 @@ class ModelMixedInput(nn.Module):
 
         if self.is_transformer:
             features = self.transformer_model(features) # (B, T, transform_embed_dim)
+            
+        if self.is_mamba:
+            features = self.mamba_model(features)
 
         B, T, feature_dim = features.shape
         features_flatten = features.contiguous().view(-1, feature_dim)
