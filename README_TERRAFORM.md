@@ -66,3 +66,29 @@ You can customize variables in `terraform/variables.tf` or pass them via `-var`:
 - `region`: AWS Region (default `us-east-1`).
 - `instance_type`: EC2 Instance Type (default `g5.xlarge`).
 - `volume_size`: Size of persistent storage (default `100` GB).
+
+## Estimated Costs
+
+Prices are approximate for `us-east-1` (N. Virginia) as of late 2024.
+
+### 1. Infrastructure Idle Cost (Instance Stopped)
+When the instance is stopped, you only pay for the persistent storage.
+*   **EBS Storage (gp3)**: ~$0.08 per GB-month.
+
+| Disk Size | Cost (Approx) | Notes |
+| :--- | :--- | :--- |
+| **50 GB** | **~$4.00 / month** | Minimum recommended for OS + Code. |
+| **100 GB** | **~$8.00 / month** | **Default**. Good for 10M transitions. |
+| **200 GB** | **~$16.00 / month** | If storing multiple large datasets. |
+| **500 GB** | **~$40.00 / month** | Heavy data usage. |
+
+### 2. Active Compute Cost (Instance Running)
+When the instance is running, you pay for the compute time + storage.
+
+| Instance Type | GPU | VRAM | Cost (Approx) | Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| **g4dn.xlarge** | NVIDIA T4 | 16GB | **~$0.526 / hour** | Budget, same as Colab free/Pro. |
+| **g5.xlarge** | NVIDIA A10G | 24GB | **~$1.006 / hour** | **Recommended**. Good speed/price balance. |
+| **p3.2xlarge** | NVIDIA V100 | 16GB | **~$3.06 / hour** | Fast training, expensive. |
+
+**Recommendation:** Stop the instance whenever you are not actively training or coding to minimize costs.
