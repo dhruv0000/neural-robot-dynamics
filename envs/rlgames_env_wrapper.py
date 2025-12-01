@@ -26,6 +26,7 @@ from typing import List, Optional, Sequence, Union
 import torch
 import warp as wp
 import numpy as np
+import wandb
 
 from envs.neural_environment import NeuralEnvironment
 from envs.warp_sim_envs import RenderMode
@@ -370,6 +371,24 @@ class RLGPUAlgoObserver(AlgoObserver):
             self.writer.add_scalar("scores/mean", mean_scores, frame)
             self.writer.add_scalar("scores/iter", mean_scores, epoch_num)
             self.writer.add_scalar("scores/time", mean_scores, total_time)
+
+        if wandb.run is not None:
+            if self.mean_scores.current_size > 0:
+                wandb.log({
+                    "scores/mean": mean_scores,
+                    "scores/iter": mean_scores,
+                    "scores/time": mean_scores,
+                    "frame": frame,
+                    "epoch": epoch_num,
+                    "time": total_time
+                })
+            
+            for k, v in self.direct_info.items():
+                wandb.log({
+                    f"{k}/frame": v,
+                    f"{k}/iter": v,
+                    f"{k}/time": v
+                })
 
 
 def register_env(

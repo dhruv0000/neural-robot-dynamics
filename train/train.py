@@ -37,6 +37,10 @@ def add_additional_params(parser):
         '--novelty', default=None, choices=['mamba', 'unroll'], type=str)
     parser.add_argument(
         '--sample-sequence-length', default=None, type=int)
+    parser.add_argument(
+        '--wandb-project', default=None, type=str)
+    parser.add_argument(
+        '--wandb-name', default=None, type=str)
     return parser
 
 if __name__ == '__main__':
@@ -106,7 +110,9 @@ if __name__ == '__main__':
             model_checkpoint_path=args.checkpoint,
             cfg=cfg,
             device=args.device,
-            novelty=args.novelty
+            novelty=args.novelty,
+            wandb_project=args.wandb_project,
+            wandb_name=args.wandb_name
         )
     elif algorithm_name == 'SequenceModelTrainer':
         # some sanity check for the consistency of config file
@@ -136,7 +142,9 @@ if __name__ == '__main__':
             model_checkpoint_path=args.checkpoint,
             cfg=cfg,
             device=args.device,
-            novelty=args.novelty
+            novelty=args.novelty,
+            wandb_project=args.wandb_project,
+            wandb_name=args.wandb_name
         )
     else:
         raise NotImplementedError(f'Algorithm {algorithm_name} not recognized')

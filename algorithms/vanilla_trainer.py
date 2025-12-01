@@ -50,9 +50,13 @@ class VanillaTrainer:
         cfg: dict, 
         model_checkpoint_path: Optional[str] = None, 
         device = 'cuda:0',
-        novelty: Optional[str] = None
+        novelty: Optional[str] = None,
+        wandb_project: Optional[str] = None,
+        wandb_name: Optional[str] = None
     ):
         self.novelty = novelty
+        self.wandb_project = wandb_project
+        self.wandb_name = wandb_name
     
         algo_cfg = cfg['algorithm']
         cli_cfg = cfg['cli']
@@ -156,6 +160,9 @@ class VanillaTrainer:
             # create logger
             self.logger = Logger()
             self.logger.init_tensorboard(self.summary_log_dir)
+            
+            if self.wandb_project is not None:
+                self.logger.init_wandb(self.wandb_project, self.wandb_name)
                 
             # other logging params
             self.save_interval = cli_cfg.get("save_interval", 50)

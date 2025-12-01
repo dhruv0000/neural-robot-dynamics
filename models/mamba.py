@@ -17,6 +17,65 @@ class MambaConfig:
     bias: bool = False
     vocab_size: int = None
 
+def selective_scan(u, dt, A_log, B, C, D):
+    """
+    Performs the selective scan operation (linear recurrence) for Mamba.
+    
+    Args:
+        u: Input signal (B, L, d_inner)
+        dt: Time step (B, L, d_inner)
+        A_log: Logarithm of the state transition matrix A (d_inner, d_state)
+        B: Input projection matrix (B, L, d_state)
+        C: Output projection matrix (B, L, d_state)
+        D: Skip connection (d_inner)
+    
+    Returns:
+        y: Output signal (B, L, d_inner)
+    """
+    # u: (B, L, d_inner)
+    # dt: (B, L, d_inner)
+    # A_log: (d_inner, d_state)
+    # B: (B, L, d_state)
+    # C: (B, L, d_state)
+    # D: (d_inner)
+    
+    batch_size, seq_len, d_inner = u.shape
+    d_state = A_log.shape[1]
+
+    # A is usually parameterized as -exp(A_log) to ensure stability
+    A = -torch.exp(A_log)  # (d_inner, d_state)
+    
+    # Discretize A and B using the zero-order hold (ZOH) method
+    # dt: (B, L, d_inner) -> (B, L, d_inner, 1)
+    dt_expanded = dt.unsqueeze(-1)
+    
+    # dA = exp(dt * A)
+    # dA: (B, L, d_inner, d_state)
+    dA = torch.exp(dt_expanded * A) 
+    
+    # dB = dt * B (simplified discretization)
+    # dB: (B, L, d_inner, d_state)
+    dB = dt_expanded * B.unsqueeze(2)
+
+    # Scan (Recurrent step)
+    # h_t = dA * h_{t-1} + dB * u_t
+    # y_t = C * h_t
+    h = torch.zeros(batch_size, d_inner, d_state, device=u.device)
+    ys = []
+    
+    for t in range(seq_len):
+        # Update hidden state
+        h = dA[:, t] * h + dB[:, t] * u[:, t].unsqueeze(-1)
+        # Project to output
+        y_t = torch.sum(h * C[:, t].unsqueeze(1), dim=-1) # (B, d_inner)
+        ys.append(y_t)
+        
+    y = torch.stack(ys, dim=1) # (B, L, d_inner)
+    
+    # Add skip connection
+    y = y + u * D
+    return y
+
 class MambaBlock(nn.Module):
     def __init__(self, config: MambaConfig):
         super().__init__()
@@ -65,47 +124,13 @@ class MambaBlock(nn.Module):
         
         dt = F.softplus(self.dt_proj(dt))  # (B, L, d_inner)
 
-        y = self.selective_scan(x_in, dt, self.A_log, B, C, self.D)
+        y = selective_scan(x_in, dt, self.A_log, B, C, self.D)
         
         y = y * F.silu(res)
         output = self.out_proj(y)
         return output
 
-    def selective_scan(self, u, dt, A_log, B, C, D):
-        # u: (B, L, d_inner)
-        # dt: (B, L, d_inner)
-        # A_log: (d_inner, d_state)
-        # B: (B, L, d_state)
-        # C: (B, L, d_state)
-        # D: (d_inner)
-        
-        batch_size, seq_len, d_inner = u.shape
-        d_state = A_log.shape[1]
 
-        A = -torch.exp(A_log)  # (d_inner, d_state)
-        
-        # Discretize A and B
-        # dt: (B, L, d_inner) -> (B, L, d_inner, 1)
-        dt_expanded = dt.unsqueeze(-1)
-        
-        # dA: (B, L, d_inner, d_state)
-        dA = torch.exp(dt_expanded * A) 
-        
-        # dB: (B, L, d_inner, d_state)
-        dB = dt_expanded * B.unsqueeze(2)
-
-        # Scan
-        h = torch.zeros(batch_size, d_inner, d_state, device=u.device)
-        ys = []
-        
-        for t in range(seq_len):
-            h = dA[:, t] * h + dB[:, t] * u[:, t].unsqueeze(-1)
-            y_t = torch.sum(h * C[:, t].unsqueeze(1), dim=-1) # (B, d_inner)
-            ys.append(y_t)
-            
-        y = torch.stack(ys, dim=1) # (B, L, d_inner)
-        y = y + u * D
-        return y
 
 class Mamba(nn.Module):
     def __init__(self, config: MambaConfig):

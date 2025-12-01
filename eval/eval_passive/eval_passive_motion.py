@@ -24,6 +24,7 @@ import argparse
 import torch
 import yaml
 import numpy as np
+import wandb
 
 from envs.warp_sim_envs import RenderMode
 
@@ -70,6 +71,12 @@ if __name__ == '__main__':
                         default = 'video.gif')
     parser.add_argument('--export-usd',
                         action='store_true')
+    parser.add_argument('--wandb-project',
+                        default=None,
+                        type=str)
+    parser.add_argument('--wandb-name',
+                        default=None,
+                        type=str)
     
     args = parser.parse_args()
 
@@ -216,3 +223,25 @@ if __name__ == '__main__':
     
     if args.export_usd:
         neural_env.save_usd()
+
+    if args.wandb_project is not None:
+        wandb.init(
+            project=args.wandb_project,
+            name=args.wandb_name,
+            config=env_cfg
+        )
+        
+        log_data = {}
+        if base_position_error is not None:
+            log_data['base_position_error_mean'] = base_position_error.cpu().item()
+            log_data['base_position_error_std'] = base_position_error_std.cpu().item()
+        
+        if base_orientation_error is not None:
+            log_data['base_orientation_error_mean'] = base_orientation_error.cpu().item()
+            log_data['base_orientation_error_std'] = base_orientation_error_std.cpu().item()
+            
+        if len(joint_idx) > 0:
+            log_data['joint_position_error_mean'] = joint_pos_error.cpu().item()
+            
+        wandb.log(log_data)
+        wandb.finish()

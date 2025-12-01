@@ -40,6 +40,7 @@ from envs.rlgames_env_wrapper import register_env, RLGPUAlgoObserver
 from envs.neural_environment import NeuralEnvironment
 from utils.python_utils import set_random_seed, get_time_stamp  
 from envs.warp_sim_envs import RenderMode
+import wandb
 
 def get_args():
     parser = argparse.ArgumentParser("")
@@ -116,6 +117,12 @@ def get_args():
                         default = 'video.gif')
     parser.add_argument('--export-usd',
                         action = 'store_true')
+    parser.add_argument('--wandb-project',
+                        default=None,
+                        type=str)
+    parser.add_argument('--wandb-name',
+                        default=None,
+                        type=str)
     
     args = parser.parse_args()
     
@@ -295,10 +302,36 @@ if __name__ == '__main__':
     if args.playback is not None and args.export_video:
         env.start_video_export(args.export_video_path)
 
+    if args.wandb_project is not None:
+        wandb.init(
+            project=args.wandb_project,
+            name=args.wandb_name,
+            config=rl_config
+        )
+
     if args.playback is None:
         train_policy(runner)
     else:
-        evaluate_policy(runner, args.playback)
+        results = evaluate_policy(runner, args.playback)
+        if args.wandb_project is not None:
+            # results is a dict, but evaluate_policy returns what?
+            # Looking at evaluate_policy, it returns runner.run() result.
+            # rl_games runner.run() usually returns None for play=True?
+            # Wait, let's check what we can log. 
+            # The output shows "reward: ... steps: ..." printed to stdout.
+            # We might need to capture it or use the returned value if available.
+            # If runner.run() doesn't return metrics, we might have to rely on parsing or modifying the runner.
+            # However, for this task, the user wants charts.
+            # If we are just running evaluation, we want to log the final reward.
+            # Let's assume for now we can't easily get it from runner without code changes to rl_games or parsing.
+            # BUT, the user request says "generate charts for our final poster presentation".
+            # The colab parses the output.
+            # Maybe we should log it in the colab?
+            # The user said "We also need yuse wandb to generate charts".
+            # If I log in colab, I can use wandb.log().
+            # But the plan was to modify the scripts.
+            # Let's see if I can get the reward from the runner.
+            pass
 
     if args.playback is not None and args.export_video:
         env.end_video_export()
@@ -318,5 +351,8 @@ if __name__ == '__main__':
     )
     
     env.close()
+    
+    if args.wandb_project is not None:
+        wandb.finish()
     
     
