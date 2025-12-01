@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage{amssymb}
+
+\usepackage[final]{corl_2025} % Use this for the initial submission.
+% \usepackage[final]{corl_2025} % Uncomment for the camera-ready ``final'' version.
+%\usepackage[preprint]{corl_2025} % Uncomment for pre-prints (e.g., arxiv); This is like ``final'', but will remove the CORL footnote.
+
+\usepackage[numbers]{natbib}
+\usepackage{multicol}
+% \usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath, bm}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+% \usepackage[table]
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{titletoc}
+
+\title{Neural Robot Dynamics}
+
+\newcommand{\sysName}{\textit{NeRD}}
+
+\newcommand{\jie}[1]{{\color{red}[Jie: #1]}}
+\newcommand{\todo}[1]{{\color{blue}[todo: #1]}}
+\newcommand{\eg}{\textit{e.g.},~}
+\newcommand{\ie}{\textit{i.e.},~}
+
+\hypersetup{
+    colorlinks=true,
+    % linkcolor=blue,
+    % linkcolor=blue,
+    % filecolor=magenta,      
+    urlcolor=magenta,
+    pdftitle={Neural Robot Dynamics},
+    % pdfpagemode=FullScreen,
+}
+    
+% \titlespacing{\section}{0pt}{3pt}{1pt}
+% \titlespacing{\subsection}{0pt}{2pt}{0pt}
+% \titlespacing{\paragraph}{0pt}{2pt}{5pt}
+
+% The \author macro works with any number of authors. There are two
+% commands used to separate the names and addresses of multiple
+% authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to
+% break the lines. Using \AND forces a line break at that point. So,
+% if LaTeX puts 3 of 4 authors names on the first line, and the last
+% on the second line, try using \AND instead of \And before the third
+% author name.
+
+% NOTE: authors will be visible only in the camera-ready and preprint versions (i.e., when using the option 'final' or 'preprint'). 
+% 	For the initial submission the authors will be anonymized.
+
+\author{
+  Jie Xu$^{1}$, Eric Heiden$^{1}$, Iretiayo Akinola$^{1}$, Dieter Fox$^{1,2}$, Miles Macklin$^{1}$, Yashraj Narang$^{1}$\\
+  $^{1}$NVIDIA\,\,\,\, $^{2}$University of Washington\\
+  \href{https://neural-robot-dynamics.github.io/}{https://neural-robot-dynamics.github.io}
+  % United States\\
+  % \texttt{jiex@nvidia.com} \\
+}
+
+
+\begin{document}
+\maketitle
+
+\setlength{\abovedisplayskip}{4pt} % default ~10pt
+\setlength{\belowdisplayskip}{4pt}
+
+%===============================================================================
+
+% \begin{abstract}
+% Simulating modern robots accurately and efficiently is an open challenge. Classical simulators either fail to capture complex dynamics, resulting in a significant sim-to-real gap, or are computationally inefficient, making methods such as online reinforcement learning intractable.
+% Neural simulators have emerged as a promising alternative, offering the ability to learn complex dynamics from ground-truth data; however, the learned models often do not generalize to unseen tasks and environments.
+% In this work, we develop a framework for learning generalizable neural simulators for robots that are structured as articulated rigid bodies. Concretely, we present \textit{NeRD} (Neural Robot Dynamics), learned robot-specific dynamics models that replace the low-level dynamics and contact solvers in a classical rigid-body simulator, predicting future states for articulated rigid bodies under contact constraints.
+% At the core of our approach are (1) a robot-centric abstract contact representation to enhance generalizability across tasks and environments, (2) a spatially-invariant state parameterization to improve the spatial generalizability of the neural dynamics models, and (3) a set of thoroughly-evaluated design decisions that enable the approach to succeed. 
+% The resulting neural robot dynamics are stable, accurate, and efficient over hundreds of simulation steps; generalize to different tasks and environment configurations; support customized robotic controllers; and, unlike most classical simulators, can be easily fine-tuned from real-world data.
+% We integrate the learned neural robot dynamics models within a state-of-the-art robotics simulator, and we validate our approach by conducting extensive experiments in both simulation and the real world to showcase the long-horizon stability, generalizability, and real-world fine-tunability of the models.
+% \end{abstract}
+
+\begin{abstract}
+Accurate and efficient simulation of modern robots remains challenging due to their high degrees of freedom and intricate mechanisms. 
+% Simulating modern robots accurately and efficiently remains challenging due to the increasing complexity of robot mechanisms.
+Neural simulators have emerged as a promising alternative to traditional analytical simulators, capable of efficiently predicting complex dynamics and adapting to real-world data; however, existing neural simulators typically require application-specific training and fail to generalize to novel tasks and/or environments, primarily due to inadequate representations of the global state. 
+% In this work, we investigate the proper representations and frameworks for 
+In this work, we address the problem of learning generalizable neural simulators for robots that are structured as articulated rigid bodies. We propose \textit{NeRD} (Neural Robot Dynamics), learned robot-specific dynamics models for predicting future states for articulated rigid bodies under contact constraints. \textit{NeRD} uniquely replaces the low-level dynamics and contact solvers in an analytical simulator and employs a robot-centric and spatially-invariant simulation state representation. We integrate the learned \textit{NeRD} models as an interchangeable backend solver within a state-of-the-art robotics simulator. We conduct extensive experiments to show that the \textit{NeRD} simulators are stable and accurate over a thousand simulation steps; generalize across tasks and environment configurations; enable policy learning exclusively in a neural engine; and, unlike most classical simulators, can be fine-tuned from real-world data to bridge the gap between simulation and reality.
+
+\end{abstract}
+
+%%%
+% Key ideas:
+%   start with learning neural simulator is important rather than comparing to classical simulators
+%   so that our main competitors are the previous neural sim works, and our work is viewed as a path rather that an ultimate solution to replace classical simulation
+
+% Two or three meaningful keywords should be added here
+\keywords{Robot Model Learning; Robotics Simulation; Neural Simulation} 
+    
+\input{text/intro}
+
+\input{text/related}
+
+\input{text/Method}
+
+\input{text/implementation}
+
+\input{text/experiments}
+
+\input{text/limitation}
+
+% \section*{Acknowledgments}
+
+%% Use plainnat to work nicely with natbib. 
+
+% \bibliographystyle{plainnat}
+\bibliography{references}
+
+\newpage
+
+\appendix
+\input{text/appendix}
+
+\end{document}
+
+

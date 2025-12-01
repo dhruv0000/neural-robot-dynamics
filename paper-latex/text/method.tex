@@ -1,0 +1,71 @@
+\section{NeRD: Neural Robot Dynamics}
+
+We now present \textit{NeRD}, robot-specific neural dynamics models for articulated rigid-body simulation. We start by presenting the typical workflow of a classical articulated rigid-body simulator in \S\ref{sec:classical_sim}. Next,  in \S\ref{sec:nerd_framework}, we introduce the \textit{hybrid prediction framework} of \textit{NeRD}, which leverages a general and compact simulation state representation describing the world to enable generalization across applications. In \S\ref{sec:robot-centric_representation}, we further improve the representation by proposing a \textit{robot-centric simulation state representation} to enforce spatial generalizability and improve the training efficiency of \textit{NeRD}.
+
+\subsection{Preliminary: A Typical Robotics Simulation Workflow}
+\label{sec:classical_sim}
+We illustrate a typical workflow of a classical robotics simulator in Fig. \ref{fig:overview}(a). The user first sets up the simulator by importing a robot model with its initial state, and specifying an environment configuration (\eg ground, objects) and a low-level controller (\eg joint position control, end-effector control). At each time step $t$, the simulator takes as input the robot model, current robot state $\bm{s}_t$, the action command fed to the robot $\bm{a}_t$, and the scene configuration. It then performs collision detection to identify contact information for interacting physical parts, and executes the low-level controller to convert the action command into joint-space torques. Those, along with the robot state, serve as intermediate quantities that are processed by the dynamics and contact solvers, where physics equations are formulated and a numerical solver is employed to calculate the acceleration. Finally, the simulator performs time integration to obtain the new state of the robot. 
+
+% % Appendix
+% Note that to improve the stability of the simulation, a classical simulator often utilizes a smaller physics solver timestep and runs multiple substeps of solver-integration iterations to obtain the actual state of the robot at the next time step, \ie $\bm{s}_{t+1}$. 
+% describing end-to-end approaches
+Previous neural robotics simulators \cite{janner2019mbpo, li2025roboticworldmodelneural, fussell2021supertrack, hansen2024tdmpc2} often adopt an \textit{end-to-end} framework that substitutes the entire simulation engine with a neural model and directly maps the robot state $\bm{s}_t$ and action command $\bm{a}_t$ to the next robot state $\bm{s}_{t+1}$, without leveraging information regarding the scene and the controller, \ie $\textit{E2E}(\bm{s}_t, \bm{a}_t)\rightarrow\bm{s}_{t+1}$. Such neural simulators are therefore forced to memorize the scene and the controller used for training and lack generalizability to novel applications.
+
+\begin{figure*}[t!]
+    \centering
+    
+    \includegraphics[width=\linewidth]{figures/figure_workflow_corl_v5.pdf}
+    % \includegraphics[width=\linewidth]{figures/figure_workflow_corl_v6.pdf}
+    % add phrase: intermediate representation
+    % improve the figure
+    \caption{\textbf{Framework overview for Neural Robot Dynamics (\textit{NeRD}).} \textbf{(a)} Workflow of a classical robotics simulator. The quantities shaded in green are application-agnostic. \textbf{(b)} Hybrid prediction framework of the \textit{NeRD}-integrated simulator. Inputs to \textit{NeRD} are the robot-centric state representations (illustrated in (\textbf{c})) within a history window.}
+    \label{fig:overview}
+    % \vspace{-1em}
+\end{figure*}
+
+\subsection{Hybrid Prediction Framework of Neural Robot Dynamics}
+\label{sec:nerd_framework}
+To train a generalizable neural simulator, we need a comprehensive representation to encode the scene and controller that generalizes across diverse applications. 
+%However, identifying a unified representation to explicitly model the scene and the controller is challenging due to the variability in scene complexities. 
+Inspired by the observation that the low-level dynamics and contact solvers in a classical simulator are application-agnostic, \textit{NeRD} employs a \textit{hybrid prediction framework} that replaces only the core physics components in a conventional simulator (Fig.~\ref{fig:overview}(b)). This hybrid framework allows \textit{NeRD} to leverage intermediate simulation quantities (\ie robot state, contact information, and joint-space torques) as a general and compact representation describing the full simulation state, providing all necessary information to evolve the robot dynamics regardless of the applications (\eg tasks, scenes, and controllers).
+
+Formally speaking, let $\bm{s}_t = (\bm{x}_t, \bm{R}_t, \bm{q}_t, \bm{\phi}_t, \dot{\bm{q}}_t)$ denote the robot state at time $t$, where $\bm{x}_t$ and $\bm{R}_t$ are the position and orientation (represented as a quaternion) of the robot base, $\bm{q}_t$ denotes articulated joint angles, $\bm{\phi}_t$ is the spatial twist of the base (\ie 6D velocity), and $\dot{\bm{q}}_t$ are joint velocities. We define $\bm{\tau}_t$ as the joint-space torque and $\bm{\mathcal{C}}_t$ as contact-related quantities. We construct $\bm{\mathcal{C}}_t = \{\bm{c}_t^i\}$ by reusing the collision detection module in the classical simulator. For each pre-specified contact point $\bm{p}_0^i$ on the robot, we obtain its contact event quantities $\bm{c}_t^i = (\bm{p}_0^i, \bm{p}_1^i, \vec{\bm{n}}^i, d^i)$. Here $\bm{p}_1^i$ is the contact point on a non-robot shape, $\vec{\bm{n}}^i$ is the contact normal, and $d^i$ is the contact distance.% (zero or negative for collisions). 
+% Appendix % We mask a $\bm{c}_t^i$ to be zero if the associated contact distance is larger than a positive threshold $d^i>\xi$, allowing free-space motion while providing robustness to cases where a collision occurs within the time step. 
+
+% describing contact info
+Our neural robot dynamics model is a parametric function $\textit{NeRD}_\theta\left(\{\bm{s}_k, \bm{\mathcal{C}}_k, \bm{\tau}_k\}_{k=t-h+1}^t\right)$ that maps the robot states, contacts, and joint torques within a history window of length $h$ to the state difference $\Delta \bm{s}_{t+1}\triangleq\bm{s}_{t+1} \ominus \bm{s}_{t}$; here, $\ominus$ is defined to be the rotation difference $\textbf{R}_{t+1}\textbf{R}_t^{-1}$ for the base orientation and the subtraction operator for other state dimensions. The model is trained by minimizing the mean squared error between the prediction and the ground-truth state difference $\widehat{\Delta \bm{s}_{t+1}}$:
+\begin{equation}
+\label{eq:original_loss}
+    \mathcal{L}_\theta = \frac{1}{NS}\sum_N \|\textit{NeRD}_\theta\left(\{\bm{s}_k, \bm{\mathcal{C}}_k, \bm{\tau}_k\}_{k=t-h+1}^t\right) - \widehat{\Delta \bm{s}_{t+1}}\|^2,
+\end{equation}
+where $N$ is the batch size and $S$ is the dimension of the robot state. The next state $\bm{s}_{t+1}$ is then computed by  $\bm{s}_{t+1}=\bm{s}_{t} \oplus \textit{NeRD}_\theta\left(\{\bm{s}_k, \bm{\mathcal{C}}_k, \bm{\tau}_k\}_{k=t-h+1}^t\right)$. 
+% Appendix % Notably, this formulation directly predicts the state at the next time step, which might span multiple substeps in the analytical simulator. This design enables us to learn the \textit{NeRD} from a finer-grained simulator with smaller substep sizes without sacrificing the efficiency of the learned model at test time. 
+This concise state representation $\{\bm{s}_t, \bm{\mathcal{C}}_t, \bm{\tau}_t\}$ is a carefully designed outcome resulting from deeply integrating the neural models into the classical simulation framework and reusing the application-agnostic intermediate simulation quantities, thereby fundamentally providing the generalizability across diverse applications.
+% Despite the concise form of the simulation state representation $\{\bm{s}_t, \bm{\mathcal{C}}_t, \bm{\tau}_t\}$, it changes the neural-simulation prediction paradigm by deeply integrating the neural models into the classical simulation framework, thereby fundamentally providing the generalizability across diverse applications.
+% Despite the concise form of the augmented simulation state representation $\{\bm{s}_t, \bm{\mathcal{C}}_t, \bm{\tau}_t\}$, it transforms the neural-simulation prediction paradigm by deeply integrating the neural models into the classical simulation framework, thereby fundamentally providing the generalizability across diverse applications.
+% augment -> unlcear
+% by capturing the dynamics solver 
+% transform -> modify/diverge
+
+\subsection{Robot-Centric State Representation}
+\label{sec:robot-centric_representation}
+The dynamics of a robot remain invariant under spatial translation, as well as rotation around the gravity axis, provided that its interaction with the environment, such as contact forces, remains unchanged in the robot's body frame. Inspired by this, we enhance the simulation state representation by introducing a \textit{robot-centric parameterization} to explicitly enforce such spatial invariance.
+
+Specifically, we transform the robot state $\bm{s}_t$ and contact-related quantities $\bm{\mathcal{C}}_t$ into the robot's base frame $\bm{B}_t = (\bm{x}_t, \bm{R}_t)$, as shown in Fig.~\ref{fig:overview}(c). For the robot articulation, we use the reduced coordinate state, which is spatially invariant; thus, we only need to transform the state of the robot base (\ie $\bm{x}_t$, $\bm{R}_t$, and $\bm{\phi}_t$) into the robot's base frame. To properly account for gravity when the robot rotates about axes other than the gravity axis, we treat gravity as an external force and augment the simulation state with gravity expressed in the robot's base frame. Additionally, the predicted state difference $\Delta \bm{s}_{t+1}$ (\ie network's output) is also expressed in the robot's base frame $\bm{B}_t$. Intuitively, this robot-centric representation encodes the world from the robot's local, myopic view -- knowing its joint state, how it contacts the environment locally, and how external forces (\ie gravity) are applied to it. \textit{NeRD} then uses this information to evolve the robot's dynamics within the local frame. By using this robot-centric parameterization, we reformulate our loss function from Eq. \ref{eq:original_loss} as:
+\begin{equation}
+\label{eq:loss}
+\mathcal{L}_\theta = \frac{1}{NS} \sum_{N}  \Big\| \textit{NeRD}_\theta \Big( \{ \bm{s}_k^{\bm{B}_k}, \bm{\mathcal{C}}_k^{\bm{B}_k}, 
+\bm{\tau}_{k}, \vec{\bm{g}}^{\bm{B}_k} \}_{k=t-h+1}^{t} \Big) - \widehat{\Delta \bm{s}_{t+1}^{\bm{B}_{t}}} \Big\|,
+\end{equation}
+where $\vec{\bm{g}}$ is the unit gravity vector, and the superscript $\bm{B}_k$ (or $\bm{B}_t$) means the corresponding quantity is expressed in the robot base frame at timestep $k$ (or $t$). 
+% Appendix
+% It is worth noting that the prediction output is defined in the robot base frame at time step $t$ instead of $t+1$, \ie $\Delta \bm{s}_{t+1}^{\bm{B}_t} \triangleq \bm{s}_{t+1}^{\bm{B}_t} \ominus \bm{s}_{t}^{\bm{B}_t}$. This is because the state of the robot base $(\bm{x}, \bm{R})$ is always identity transformation (\ie $\bm{x}_t^{\bm{B}_t} = \bm{x}_{t+1}^{\bm{B}_{t + 1}} = \bm{0}$ and $\bm{R}_t^{\bm{B}_t} = \bm{R}_{t+1}^{\bm{B}_{t+1}} = \mathbf{I}$) when expressed in its own base frame, which results in zero state changes for these dimensions, \ie $\Delta \bm{x}_{t+1}^{\bm{B}_{t+1}} = \mathbf{0}$ and $\Delta \bm{R}_{t+1}^{\bm{B}_{t+1}} = \mathbf{0}$. 
+The robot state is then updated by 
+\begin{equation}
+\bm{s}_{t+1} = \mathcal{T}^w_{\bm{B}_t}\Big(\bm{s}^{\bm{B}_t}_{t} \oplus \textit{NeRD}_\theta\left(\{\bm{s}_k^{\bm{B}_k}, \bm{\mathcal{C}}_k^{\bm{B}_k}, \bm{\tau}_{k}, \vec{\bm{g}}^{\bm{B}_k}\}_{k=t-h+1}^t\right)\Big),
+\end{equation}
+where $\mathcal{T}^w_{\bm{B}_t}(\cdot)$ is the transformation from robot base frame at time step $t$ to the world frame.
+
+The spatial invariance property of our robot-centric representation explicitly enforces the spatial generalizability of the learned robot dynamics models.
+% By explicitly enforcing spatial invariance, our robot-centric representation significantly enhances the spatial generalizability of the learned dynamics models. 
+In addition, it reduces the state space, substantially enhancing the training and data efficiency of \textit{NeRD} by eliminating the need to exhaustively sample all spatial positions and orientations of the robot during model training. 
