@@ -58,3 +58,22 @@ NOTE
 Verification requires a full installation of NVIDIA Warp (warp-lang) and its dependencies (e.g., warp.sim). In some environments, this may require manual installation steps not covered by 
 requirements.txt
 .
+
+### 4. WandB Logging Metrics
+The training pipeline logs comprehensive metrics to Weights & Biases (and TensorBoard) to track performance and stability.
+
+**Training Metrics:**
+* `params/lr/epoch`: Current learning rate.
+* `training/train_loss/epoch`: Average training loss.
+* `training_info/state_MSE/epoch`: Mean Squared Error of state predictions.
+* `training_info/q_error_norm/epoch`: Error norm for joint positions.
+* `training_info/qd_error_norm/epoch`: Error norm for joint velocities.
+
+**Validation Metrics:**
+* `training/valid_{dataset}_loss/epoch`: Validation loss for each dataset.
+* `validating_info/state_MSE_{dataset}/epoch`: Validation MSE.
+
+**Evaluation Metrics (Rollout):**
+* `eval_{horizon}-steps/error(MSE)/epoch`: MSE over the full rollout horizon.
+* `eval_{horizon}-steps/q_error(MSE)/epoch`: MSE for joint positions over rollout.
+* `eval_details/error(MSE)_step_{i}/epoch`: Step-wise error accumulation.
