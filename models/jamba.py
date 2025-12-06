@@ -37,17 +37,17 @@ class MambaLayer(nn.Module):
         
         # 2. Convolution: Must handle the expanded size (d_model * 2)
         self.conv1d = nn.Conv1d(
-            in_channels=d_model * 2,   # <--- FIXED: 256 inputs
-            out_channels=d_model * 2,  # <--- FIXED: 256 outputs
+            in_channels=d_model * 2,   # 256 inputs
+            out_channels=d_model * 2,  # 256 outputs
             kernel_size=4, 
-            groups=d_model * 2,        # <--- FIXED: Depthwise over 256
+            groups=d_model * 2,        # Depthwise over 256
             padding=3
         )
         
         # 3. Projection: Project back down to d_model
-        self.out_proj = nn.Linear(d_model * 2, d_model) # <--- FIXED
+        self.out_proj = nn.Linear(d_model * 2, d_model) 
         
-        self.act = nn.SiLU() # <--- FIXED TYPO
+        self.act = nn.SiLU()
 
     def forward(self, x):
         # x: [Batch, Len, Dim]
@@ -109,7 +109,7 @@ class JambaModel(nn.Module):
         self.normalize_output = False 
         self.input_rms = None
         self.output_rms = None
-        self.is_rnn = False # Jamba acts like a Transformer here, not an RNN
+        self.is_rnn = False 
         
         attn_interval = 8
         for i in range(n_layers):
@@ -127,9 +127,11 @@ class JambaModel(nn.Module):
         self.output_rms = output_rms
         
     def init_rnn(self, batch_size):
-        # We need this method because 'evaluator.py' calls it blindly.
-        # Since Jamba isn't an RNN, we just pass.
         pass
+
+    def evaluate(self, x):
+        # Required by evaluator.py
+        return self.forward(x)
     # ------------------------------------------
 
     def forward(self, x):
