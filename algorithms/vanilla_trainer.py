@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 from envs.neural_environment import NeuralEnvironment
 from models.models import ModelMixedInput
-from models.jamba import JambaModel  # <--- Added Jamba Import
+from models.jamba import JambaModel  # Added Jamba Import
 from utils.datasets import BatchTransitionDataset, collate_fn_BatchTransitionDataset
 from utils.evaluator import NeuralSimEvaluator
 from utils.python_utils import (
@@ -82,10 +82,20 @@ class VanillaTrainer:
 
         # create neural sim model
         if model_checkpoint_path is None:
-            # --- CRITICAL FIX: Define input_dim BEFORE checking for Jamba ---
             input_sample = self.neural_integrator.get_neural_model_inputs()
-            input_dim = input_sample.shape[-1]
-            # ---------------------------------------------------------------
+            
+            # --- FIX: Handle Dictionary Inputs for Dimension Check ---
+            if isinstance(input_sample, dict):
+                # We use the 'states' key to determine the dimension
+                if 'states' in input_sample:
+                    input_dim = input_sample['states'].shape[-1]
+                else:
+                    # Fallback to the first available key if states is missing
+                    input_dim = list(input_sample.values())[0].shape[-1]
+            else:
+                # If it's already a tensor
+                input_dim = input_sample.shape[-1]
+            # ---------------------------------------------------------
 
             if 'jamba' in cfg['network']:
                 print(f"Initializing Jamba Model with Input Dim: {input_dim}...")
@@ -155,8 +165,7 @@ class VanillaTrainer:
             # logging related
             self.log_dir = cli_cfg["logdir"]
             if os.path.exists(self.log_dir) and not cli_cfg["skip_check_log_override"]:
-                # In Colab/Automation, assume yes to overwrite
-                pass 
+                pass
                 
             os.makedirs(self.log_dir, exist_ok = True)
 
@@ -377,10 +386,7 @@ class VanillaTrainer:
         return loss, loss_itemized
         
     def compute_loss_unroll(self, data, train):
-        # ... (Unroll logic simplified for brevity, assuming standard training for Jamba)
-        # If unroll is needed, we can implement the loop here.
-        # For now, let's use standard loss.
-        return self.compute_loss(data, train) # Fallback to standard for now to avoid complexity
+        return self.compute_loss(data, train)
         
     def one_epoch(
         self, 
