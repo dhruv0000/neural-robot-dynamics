@@ -35,7 +35,7 @@ class MambaLayer(nn.Module):
         self.in_proj = nn.Linear(d_model, d_model * 2)
         self.conv1d = nn.Conv1d(d_model, d_model, kernel_size=4, groups=d_model, padding=3)
         self.out_proj = nn.Linear(d_model, d_model)
-        self.act = nn.Silu()
+        self.act = nn.SiLU()
 
     def forward(self, x):
         B, L, D = x.shape
