@@ -1,4 +1,4 @@
-%%writefile /content/neural-robot-dynamics/algorithms/vanilla_trainer.py
+
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
