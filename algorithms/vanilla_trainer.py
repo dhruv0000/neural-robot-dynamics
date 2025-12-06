@@ -28,7 +28,7 @@ from torch.nn.utils.clip_grad import clip_grad_norm_
 import yaml
 import numpy as np
 from tqdm import tqdm
-
+from models.jamba import JambaModel #import JambaModel
 from envs.neural_environment import NeuralEnvironment
 from models.models import ModelMixedInput
 from utils.datasets import BatchTransitionDataset, collate_fn_BatchTransitionDataset
@@ -80,15 +80,26 @@ class VanillaTrainer:
 
         # create neural sim model
         if model_checkpoint_path is None:
-            input_sample = self.neural_integrator.get_neural_model_inputs()
-            self.neural_model = ModelMixedInput(
-                input_sample = input_sample,
-                output_dim = self.neural_integrator.prediction_dim,
-                input_cfg = cfg['inputs'],
-                network_cfg = cfg['network'],
-                device = self.device,
-                novelty = self.novelty
-            )
+            
+            if 'jamba' in cfg['network']:
+                print("Initializing Jamba Model...")
+                self.neural_model = JambaModel(
+                    input_dim=input_dim,                # <--- YOU WERE MISSING THIS LINE
+                    d_model=cfg['network'].get('d_model', 128),
+                    n_layers=cfg['network'].get('n_layers', 4)
+                )
+                self.neural_model.to(self.device)
+            else:
+            # This modification above is for the jamba model 
+                input_sample = self.neural_integrator.get_neural_model_inputs()
+                self.neural_model = ModelMixedInput(
+                    input_sample = input_sample,
+                    output_dim = self.neural_integrator.prediction_dim,
+                    input_cfg = cfg['inputs'],
+                    network_cfg = cfg['network'],
+                    device = self.device,
+                    novelty = self.novelty
+                )
         else:
             checkpoint = torch.load(model_checkpoint_path, map_location=self.device)
             self.neural_model = checkpoint[0]

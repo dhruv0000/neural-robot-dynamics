@@ -1,0 +1,18 @@
+env:
+  num_envs: 2048
+  env_name: Ant
+  # ... (Copy other env settings from transformer.yaml if needed) ...
+
+algorithm:
+  name: SequenceModelTrainer
+  sample_sequence_length: 64
+  batch_size: 64
+  num_epochs: 100
+  optimizer:
+    lr_start: 1.e-3
+    lr_schedule: constant
+
+network:
+  jamba: True        # This triggers the if statement we wrote
+  d_model: 128
+  n_layers: 4
