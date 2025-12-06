@@ -364,6 +364,7 @@ class VanillaTrainer:
 
         return loss, loss_itemized
         
+    def compute_loss_unroll(self, data, train):
         # Unrolling logic for temporal stability
         # We assume data['states'] has shape (B, T, D)
         # We will unroll for the length of the sequence
