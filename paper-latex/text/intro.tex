@@ -1,0 +1,53 @@
+\section{Introduction}
+
+% Neural physics has becoming important and popular because of efficient prediction of complex dynamics that are hard to be effectively analytically modelled, fluid, cloth, soft bodies, aerodynanmics, rigid bodies
+% or
+% simulation is important for robotics
+Simulation plays a crucial role in various robotics applications, such as policy learning \cite{andrychowicz2020learning, chen2023visualdex, Haarnoja2024learning, handa2023dextreme, kumar2021rma, lee2020learning, tang2024automate}, safe and scalable robotic control evaluation \cite{funk2021benchmarking,gu2023maniskill,li24simpler,liu2021ocrtoc}, and computational optimization of robot designs \cite{du2016_copter, li2023tool, xu2021design}. 
+% In robotics, neural physics simulators have become important tools to learn world models, capture better real dynamics and fascilate control and policy learning algorithms; or developing neural simulators has be increasingly important in robotics due to ...
+Recently, neural robotics simulators have emerged as a promising alternative to traditional analytical simulators, as neural simulators can efficiently predict robot dynamics and learn intricate physics from real-world data.
+% due to their efficiency in predicting robot dynamics and their ability to learn intricate physics from real-world data. 
+For instance, neural simulators have been leveraged to capture complex interactions challenging for analytical modeling \cite{pfrommer2021contactnets, hoffman2025learning, ajay2018augmenting, zeng2020tossingbot}, or have served as learned world models to facilitate sample-efficient policy learning \cite{janner2019mbpo,li2025roboticworldmodelneural}. 
+% However, prior works are task-specific, end-to-end (fully replace a simulator as a whole) and robot-state-action->state, insufficient info to ground the dynamics in unseen scene, and inadequate state representation => no generalization, cannot fully substitute a classical simulator. unlike classical simulators, they are not generalizable to new tasks, environments, and state distributions, new controller types; end-to-end: means remember controller, environments, tasks; 
+
+However, existing neural robotics simulators typically require application-specific training, often assuming fixed environments \cite{li2025roboticworldmodelneural,andriluka2024neural} or simultaneous training alongside control policies \cite{fussell2021supertrack, hansen2022temporal}. 
+These limitations primarily stem from their end-to-end frameworks with inadequate representations of the global simulation state, \ie neural models often substitute the entire classical simulator and directly map robot state and control actions (\eg target joint positions, target link orientations) to the robot's next state. 
+% % todo: skip the first part about end-to-end
+Without encoding the environment in the state representation, the learned simulators have to implicitly memorize the task and environment details. Additionally, utilizing controller actions as input causes the simulators to overfit to particular low-level controllers used during training. Consequently, unlike classical simulators, these neural simulators often fail to generalize to novel state distributions (induced by new tasks), unseen environment setups, and customized controllers (\eg novel control laws or controller gains).
+
+\begin{figure*}[t!]
+    \centering
+    % \includegraphics[width=\linewidth]{figures/experiments_v1.pdf}
+    \includegraphics[width=\linewidth]{figures/envs_v2.pdf}
+
+    \caption{We propose \textbf{\textit{NeRD}}, learned robot-specific dynamics models for generalizable articulated rigid body simulation. We demonstrate our approach by training \textit{NeRD} models on six diverse robotic systems, from left: \textit{Cartpole, Double Pendulum, Ant, Franka, ANYmal, Cube Toss}.}
+    % \caption{\textbf{We train \textit{NeRD} on six systems.} From left: Cartpole, Double Pendulum, Ant, Franka, ANYmal, Cube Toss.}
+    \label{fig:tasks}
+    \vspace{-1em}
+\end{figure*}
+
+
+% we study the problem of learning generalizable neural simulator. robot-specific as different robots have different mechanisms and parameters, but task-generalizable once trained. envision a future; explain why simulator only for robots not for exteriors; simulator tailored for a particular robot
+% In this work, we explore improved representations and frameworks 
+In this work, we address the problem of learning generalizable neural simulators for articulated rigid-body robots. We envision a future where each robot is equipped with a neural simulator pretrained from analytical simulations. Such a simulator could conduct lifelong fine-tuning as the robot interacts with the real environment to accommodate wear-and-tear and environmental changes, and facilitate versatile skill learning in a digital twin powered by the continuously-updated simulator. 
+
+% featured by two key novelty: (1) hybrid framework, only replace physics and contact solver (inspired by application-agnosticity of those modules): provide sufficient and application-agnostic info about the global simulation state, universal representation across applications/tasks/environments; (2) robot-centric/myopic/ego-centric and spatially-invariant environment/global state representation: rotate everything into robot's frame, compact representation only capture essential information about the world that related to evolving the dynamics of the robot: further improve generalization, not only spatially, but also sample-efficient as the representation is compact and local, different tasks/setups will results in same representations
+Toward this goal, we propose \textit{Neural Robot Dynamics} (\textit{NeRD}), a learned robot-specific dynamics model for predicting the evolution of articulated rigid-body states under contact constraints. \textit{NeRD} is characterized by two key innovations: (1) a \textit{hybrid prediction framework},  where \textit{NeRD} uniquely replaces only the \textit{application-agnostic} simulation modules -- \ie the low-level forward dynamics and contact solvers -- and leverages a
+% while continuing to leverage the 
+% simple and fundamental 
+general and compact 
+representation describing the world surrounding robots;
+%and enabling its generalizability across tasks, environments, and controllers;
+(2) a \textit{robot-centric state representation}, 
+% where \textit{NeRD} employs a robot-centric and spatially-invariant simulation state representation 
+where \textit{NeRD} further improves the simulation state representation 
+to explicitly enforce dynamics invariance under translation and rotation around the gravity axis, thus further enhancing \textit{NeRD}'s spatial generalizability and training efficiency. 
+% advantages of NeRD: accurate and stable for long-horizon trajectories; generalizability across tasks, environment, and controllers; differentiability and fine-tunability;
+Once trained, our \textit{NeRD} models can (1) provide stable and accurate predictions over hundreds to thousands of simulation steps; (2) generalize to different tasks, environments, and low-level controllers; and (3) effectively fine-tune from real-world data to bridge sim-to-real gaps. Additionally, with our %application-agnostic 
+hybrid and modular 
+design of \textit{NeRD}, we integrate \textit{NeRD} as an interchangeable backend solver within a state-of-the-art robotics simulator \cite{warp2022}, enabling users to effortlessly reuse existing policy-learning environments and activate \textit{NeRD} as a new physics backend through a single-line switch. 
+
+% evaluate in xxx different robot systems spanning from simple structures to complicated mechanisms
+We train \textit{NeRD} models on six different robotic systems (Fig.~\ref{fig:tasks}) to illustrate the broad applicability of our proposed methodology. We evaluate the trained \textit{NeRD} models on extensive experiments in both simulation and real-world scenarios, including long-horizon dynamics prediction and policy learning on a diverse set of tasks that are unseen during \textit{NeRD} model training. 
+% thanks to the long-horizon stability and accuracy, to our best knowledge, it's the first pre-trained neural physics simulator that allows policy to be trained entirely in a neural engine and transfer back to the GT anaylitical simulator.
+Due to the long-horizon stability and accuracy of \textit{NeRD}, we demonstrate -- for the first time, to the best of our knowledge -- that robotic policies learned exclusively within a pretrained neural simulator can successfully achieve zero-shot deployment in the analytical simulator and even transfer directly to the real world.

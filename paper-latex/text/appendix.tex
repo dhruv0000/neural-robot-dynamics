@@ -1,0 +1,364 @@
+% \documentclass{article}
+% \usepackage{amssymb}
+
+% \usepackage[final]{corl_2025} % Use this for the initial submission.
+% % \usepackage[final]{corl_2025} % Uncomment for the camera-ready ``final'' version.
+% %\usepackage[preprint]{corl_2025} % Uncomment for pre-prints (e.g., arxiv); This is like ``final'', but will remove the CORL footnote.
+
+% \usepackage[numbers]{natbib}
+% \usepackage{multicol}
+% \usepackage{xcolor}
+% \usepackage{graphicx}
+% \usepackage{amsmath, bm}
+% \usepackage{multirow}
+% \usepackage{booktabs}
+% \usepackage[table]{xcolor}
+% \usepackage{caption}
+% \usepackage{titlesec}
+% \usepackage{tocloft}
+% \cftsetpnumwidth{2.5em}      % Adjust if your section numbers are wider
+% \cftsetrmarg{3.2em}          % Adjust right margin so dotted lines look nice
+% \renewcommand{\cftsecnumwidth}{2em}  % Adds space between section number and title
+% \renewcommand{\cftsubsecnumwidth}{2.5em} % Adjust spacing between subsection number and title
+
+% \title{Neural Robot Dynamics \\ Appendix}
+
+% \author{
+% Submission ID: 222
+% }
+
+% \newcommand{\sysName}{\textit{NeRD}}
+% \renewcommand{\thesection}{A.\arabic{section}}
+% \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+% \renewcommand{\thetable}{A.\arabic{table}}
+% \renewcommand{\thefigure}{A.\arabic{figure}}
+
+% \newcommand{\jie}[1]{{\color{red}[Jie: #1]}}
+% \newcommand{\todo}[1]{{\color{blue}[todo: #1]}}
+% \newcommand{\eg}{\textit{e.g.},~}
+% \newcommand{\ie}{\textit{i.e.},~}
+
+% \begin{document}
+% \maketitle
+
+\begin{center}
+    \Large \textbf{Neural Robot Dynamics: Appendix}
+\end{center}
+
+\startcontents[appendix]
+\printcontents[appendix]{l}{1}{\section*{Appendix Contents}}
+% \tableofcontents  % This generates the Table of Contents
+\thispagestyle{empty}
+\newpage
+
+% \subsection{Robot Instance Details}
+% \label{sup:robot_details}
+% \subsubsection{Cartpole}
+% Cartpole is 2-DoF robot consisting of one prismatic joint for the base cart and one revolute joint for the pole. The sampling ranges of its initial state and joint torque sequences are shown in Table \ref{tab:cartpole_specs}.
+
+
+% \subsubsection{Double Pendulum}
+
+% \subsubsection{Franka}
+
+% \subsubsection{Ant}
+
+\section{Additional \textit{NeRD} Details}
+\label{sup:nerd_details}
+We provide additional details about \textit{NeRD} that are not covered in the main paper due to space constraints.
+
+\paragraph{Contact-Related Quantities}
+% masks
+We use contact-related quantities $\bm{\mathcal{C}}_t$ as an application-agnostic representation to capture how the surroundings impact the robot's dynamics, without the need to parameterize the whole environment. This is inspired by the dynamics and contact solvers of analytical simulators, as these solvers also use these contact-related quantities to formulate physics equations to evolve the robot dynamics. We construct $\bm{\mathcal{C}}_t = \{\bm{c}_t^i\}$ by reusing the collision detection module in the classical simulator. Specifically, in our implementation, we adopt a GPU-parallelized collision detection algorithm adapted from the one in Warp. For each pre-specified contact point $\bm{p}_0^i$ on the robot, we use the collision detection algorithm to compute its contact event quantities $\bm{c}_t^i = (\bm{p}_0^i, \bm{p}_1^i, \vec{\bm{n}}^i, d^i)$. Here $\bm{p}_1^i$ is the contact point on a non-robot shape, $\vec{\bm{n}}^i$ is the contact normal, and $d^i$ is the contact distance (zero or negative for collisions). We mask a $\bm{c}_t^i$ to be zero if the associated contact distance is larger than a positive threshold $d^i>\xi$, allowing free-space motion while providing robustness to cases where a collision occurs within the timestep. Quantity $\xi$ is a positive value greater than or equal to the \textit{contact thickness} of a geometry (\ie a standard collision-detection parameter in classical simulators). Ideally, $\xi$ should also exceed the allowed maximum displacement of the contact point within a timestep, ensuring that all near-contact events are retained. However, in practice, the choice of $\xi$ is very flexible, and we use a fixed setting of $\xi = \max(4\cdot\textit{contact\_thickness}, 0.1)$ across all our experiments without task-specific tuning.
+
+\paragraph{Robot-Centric State Representation}
+Here we provide the detailed calculation for transforming the robot state into robot's base frame. For the robot state $\bm{s}_k$ at time step $k\in[t-h+1, t]$, we transform it into robot's base frame, $\bm{B}_k$, at time step $k$, where $\bm{B}_k=(\bm{x}_k, \bm{R}_k)$. For the robot articulation, we use the reduced coordinate state, which is spatially invariant; thus, we only need to transform the state of the robot base (\ie $\bm{x}_k$, $\bm{R}_k$, and $\bm{\phi}_k$) into the robot's base frame. Therefore, we have $\bm{s}^{\bm{B}_k}_k = (\bm{x}^{\bm{B}_k}_k, \bm{R}^{\bm{B}_k}_k, \bm{q}_k, \bm{\phi}^{\bm{B}_k}_k, \bm{\dot{q}}_k)$, with
+\begin{align}
+    \bm{x}^{\bm{B}_k}_k &= \bm{0}, \\
+    \bm{R}^{\bm{B}_k}_k &= \textit{Identity}, \\
+    \bm{\nu^{\bm{B}_k}}_k &= \bm{R}^{-1}_k (\bm{\nu}_k - \bm{x}_k \times \bm{\omega}_k), \\
+    \bm{\omega^{\bm{B}_k}}_k &= \bm{R}^{-1}_k \bm{\omega}_k,
+\end{align}
+where $\bm{\nu}$ and $\bm{\omega}$ are the linear and angular components of a spatial twist $\bm{\phi}$, respectively.
+
+Additionally, the predicted state difference $\Delta \bm{s}_{t+1}$ (\ie the network's output) is expressed in the robot's base frame at time step $t$ instead of $t+1$, \ie $\Delta \bm{s}_{t+1}^{\bm{B}_t} \triangleq \bm{s}_{t+1}^{\bm{B}_t} \ominus \bm{s}_{t}^{\bm{B}_t}$. This is because, when expressed in its own base frame, the state of the robot base $(\bm{x}, \bm{R})$ is always the identity transformation (\ie $\bm{x}_t^{\bm{B}_t} = \bm{x}_{t+1}^{\bm{B}_{t + 1}} = \bm{0}$ and $\bm{R}_t^{\bm{B}_t} = \bm{R}_{t+1}^{\bm{B}_{t+1}} = \mathbf{I}$), which results in zero state changes for these dimensions, so $\Delta \bm{x}_{t+1}^{\bm{B}_{t+1}} = \mathbf{0}$ and $\Delta \bm{R}_{t+1}^{\bm{B}_{t+1}} = \mathbf{0}$. Therefore the learned model cannot predict the motion of the robot base if using $\Delta\bm{s}^{\bm{B}_{t+1}}_{t+1}$ as the prediction target. 
+
+To compute $\bm{s}^{\bm{B}_t}_{t+1} = (\bm{x}^{\bm{B}_t}_{t+1}, \bm{R}^{\bm{B}_t}_{t+1}, \bm{q}_{t+1}, \bm{\phi}^{\bm{B}_t}_{t+1}, \bm{\dot{q}}_{t+1})$, we use the following calculations:
+\begin{align}
+    \bm{x}^{\bm{B}_t}_{t+1} &= \bm{R}^{-1}_t(\bm{x}_{t+1} - \bm{x}_t), \\
+    \bm{R}^{\bm{B}_t}_{t+1} &= \bm{R}^{-1}_t \bm{R}_{t+1}, \\
+    \bm{\nu^{\bm{B}_t}}_{t+1} &= \bm{R}^{-1}_t (\bm{\nu}_{t+1} - \bm{x}_t \times \bm{\omega}_{t+1}), \\
+    \bm{\omega^{\bm{B}_t}}_{t+1} &= \bm{R}^{-1}_t \bm{\omega}_{t+1},
+\end{align}
+
+\paragraph{Multi-Substep Prediction}
+To improve the stability of the simulation, a classical simulator often utilizes a smaller timestep (\ie substep) and runs multiple substeps of solver-integration iterations to obtain the actual state of the robot at the next time step, $\bm{s}_{t+1}$ (as shown in Fig.~\ref{fig:overview}(a)). Unlike previous neural simulation works \cite{sanchez2018graph, andriluka2024neural, allen2023contact} that sequentially predict the robot state acceleration at each substep and obtain the robot state at next time step by time integration over substeps, \textit{NeRD} directly predicts the state difference from the current robot state to the state at the next (macro) time step, $\bm{s}_{t+1}$, which might span multiple substeps in the analytical simulator. This design enables us to learn \textit{NeRD} from a finer-grained simulator with smaller substep sizes without sacrificing the efficiency of the learned model at test time. 
+
+\section{Additional Training Details and Hyperparameters}
+\label{sup:training_details}
+We adopt a lightweight implementation of causal Transformer \cite{nanoGPT,radford2019language}, and repurpose it as a sequential model for robot dynamics. Past robot-centric simulation states are encoded into embeddings via a learnable linear layer, processed through Transformer blocks with self-attention, and then mapped to latent features from which the robot state difference is predicted as the output. 
+
+We use a fixed set of hyperparameters for training \textit{NeRD} across all six robotic systems -- including training hyperparameters and Transformer hyperparameters -- except for the embedding size of the Transformer model. For robots with fewer degrees of freedom, we use a smaller embedding size to enhance training and inference efficiency. The complete hyperparameter settings used in our experiments are provided in Table \ref{tab:hyperparams}.
+
+\begin{table*}[h!]
+\caption{Training hyperparameters in the experiments.}
+\centering
+\label{tab:hyperparams}
+\fontsize{9pt}{11.5pt}\selectfont
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l|l|c|c|c|c|c|c}
+% \toprule
+\hline
+\textbf{Robot}   &          & \textbf{Cartpole} & \textbf{Pendulum} & \textbf{Cube Tossing} & \textbf{Franka} & \textbf{Ant} & \textbf{ANYmal} \\ 
+% \midrule
+% \midrule
+\cline{1-8}
+\multirow{3}{*}{Training} & history window size $h$ & \multicolumn{6}{c}{10} \\
+\cline{2-8}
+& batch size & \multicolumn{6}{c}{512} \\
+\cline{2-8}
+& learning rate & \multicolumn{6}{c}{linear decay from $1e^{-3}$ to $1e^{-4}$} \\
+\hline
+\multirow{5}{*}{Transformer} & block size & \multicolumn{6}{c}{32} \\
+\cline{2-8}
+& num layers & \multicolumn{6}{c}{6} \\
+\cline{2-8}
+& num heads & \multicolumn{6}{c}{12} \\
+\cline{2-8}
+& input embedding size & \multicolumn{3}{c|}{192} & \multicolumn{3}{c}{384} \\
+\cline{2-8}
+& dropout & \multicolumn{6}{c}{0} \\
+\hline
+\multirow{2}{*}{Output MLP} & num layers & \multicolumn{6}{c}{1} \\
+\cline{2-8}
+& layer size & \multicolumn{6}{c}{64} \\
+\hline
+\end{tabular}
+\end{table*}
+
+% training params
+% transformer params
+
+\section{Additional Experiment Details}
+\label{sup:exp_details}
+\subsection{Details of Policy Learning Tasks}
+\label{sup:tasks}
+We train a \textit{NeRD} model for each robotic system and use the trained \textit{NeRD} model in all the downstream tasks for the corresponding robotic system. Here we provide details of the policy learning tasks in \S\ref{sec:exp-policy-learning}.
+
+\subsubsection{Cartpole}
+\paragraph{Swing-Up Task}
+In this task, a \textit{Cartpole} (2-DoF) is controlled to swing up its pole from a randomized initial angle to be upright and maintain the upright pose as long as possible. The \textit{Cartpole} is directly controlled by the commanded 1D joint-space torque of the base prismatic joint. The observation of the policy is $4$-dimensional, including:
+\begin{itemize}
+    \item 2-dim joint positions: $x, \theta$
+    \item 2-dim joint velocities: $\dot{x}, \dot{\theta}$
+\end{itemize}
+A trajectory is terminated if it exceeds the maximum number of steps $300$, or the cart position of the \textit{Cartpole} moves outside the [$-4\,$\textit{m}, $4\,$\textit{m}] range, or the joint velocity is above $10$ \textit{rad/s}.
+
+The stepwise reward function is below:
+$$\mathcal{R}_t = 5 - \theta_t ^2 - 0.05 x_t^2 - 0.1 \dot{\theta_t}^2 - 0.1\dot{x_t}^2.$$
+
+\subsubsection{Ant}
+\paragraph{Ant Running}
+In this task, an \textit{Ant} robot (14-DoF) is controlled to move forward as fast as possible. The action space is 8D joint-space torque of Ant's non-base revolute joints, and the \textit{Ant} is directly controlled by the commanded joint-space torque. The observation space has 29 dimensions, including:
+\begin{itemize}
+    \item 1-dim height of the base $h$
+    \item 4-dim orientation of the base represented by a quaternion
+    \item 3-dim linear velocity of the base $\bm{v}$
+    \item 3-dim angular velocity of the base $\bm{\omega}$
+    \item 8-dim joint positions
+    \item 8-dim joint velocities
+    \item 2-dim up and heading vector projections: $p_\text{up}, p_\text{heading}$.
+\end{itemize}
+The episode is terminated if it exceeds the maximum number of steps $500$, or the height of the base $h$ falls below $0.3$ \textit{m} (\ie $h < 0.3$ \textit{m}). 
+
+The stepwise reward function for the running task is defined below:
+$$\mathcal{R}_t = \bm{v}_x + 0.1 p_\text{up} + p_\text{heading}.$$
+
+\paragraph{Ant Spinning}
+An \textit{Ant} is controlled to maximize its spinning speed around the gravity axis (Y-axis in this environment) in this task. It uses the same observation space and the termination condition as the running task. The stepwise reward function is defined as below:
+$$\mathcal{R}_t = \bm{\omega}_y + p_\text{up}.$$
+
+\paragraph{Ant Spin Tracking}
+This task requires an \textit{Ant} to track a spinning speed of $5$ \textit{rad/s}. It uses the same observation space and termination condition as the running task. The stepwise reward function is defined below:
+$$\mathcal{R}_t = 5\cdot\exp(-(\bm{\omega}_y - 5)^2 - 0.1\bm{\omega}_x^2-0.1\bm{\omega}_z^2) + 0.1 p_\text{up}.$$
+
+\subsubsection{Franka}
+\paragraph{End-Effector Reach Task}
+The goal of this task is to move the Franka robot's end-effector to a randomly-specified target position. The action space is defined as delta joint positions, which are executed via a \textit{joint-position PD controller} (Note: the \textit{NeRD} model is still predicting using the joint-space torques, which are converted from the target joint positions via the joint-position PD controller). We also conducted another experiment with \textit{joint-torque control} in \S\ref{sup:franka_joint_torque}. The 13-dim observation space consists of the following:
+\begin{itemize}
+    \item 7-dim joint positions
+    \item 3-dim end-effector position
+    \item 3-dim target goal position
+\end{itemize}
+
+The episode length of this task is $128$. We adopt an exponential reward function from our existing setups, with minimal tuning:
+$$\mathcal{R}_t = -d + \frac{1}{\exp(50d) + \exp(-50d) + \epsilon} + \frac{1}{\exp(300d) + \exp(-300d) + \epsilon}, $$
+
+where $d = \|\vec{e}\|$ is the end-effector's distance to the goal position and $\epsilon = 0.0001$.
+
+\subsubsection{ANYmal}
+
+\paragraph{Forward Walk Velocity-Tracking}
+In this task, an \textit{ANYmal} robot \cite{hutter2016anymal} (18-DoF) is controlled to track a forward walking speed of $1$ \textit{m/s}. The action space is the target joint positions, and the \textit{ANYmal} is controlled by a \textit{joint-position PD controller}. The observation space is similar to \textit{Ant} tasks and has $37$ dimensions, including the following:
+\begin{itemize}
+    \item 1-dim height of the base $h$
+    \item 4-dim orientation of the base represented by a quaternion
+    \item 3-dim linear velocity of the base $\bm{v}$
+    \item 3-dim angular velocity of the base $\bm{\omega}$
+    \item 12-dim joint positions
+    \item 12-dim joint velocities
+    \item 2-dim up and heading vector projections: $p_\text{up}, p_\text{heading}$.
+\end{itemize}
+The episode is terminated if it exceeds the maximum number of steps $1000$, or the height of the base $h < 0.4$ \textit{m}, or the base or the knees hit the ground. We adopt a commonly used reward function \cite{makoviychuk2021isaac} with minimal tuning:
+$$\mathcal{R}_t = \exp\Big(-\left((\bm{v}_x - 1)^2 + \bm{v}_z^2\right)\Big) + 0.5 \exp(-\bm{\omega}_y^2) - (0.002\sum \bm{\tau})^2,$$
+where $\bm{\tau}$ is the joint-space torque. Note that, in our \textit{ANYmal} environments, $\vec{x}$ is the forward direction, $\vec{z}$ is the sideways direction, and $\vec{y}$ is the upward direction.
+
+\paragraph{Sideways Walk Velocity-Tracking}
+This task requires an \textit{ANYmal} robot to track a sideways walking speed of $1$ \textit{m/s}. It uses the same action space, observation space, and termination condition as the \textit{Forward Walk Velocity-Tracking task}. The reward function is below:
+$$\mathcal{R}_t = \exp\Big(-\left(\bm{v}_x^2 + (\bm{v}_z - 1)^2\right)\Big) + 0.5 \exp(-\bm{\omega}_y^2) - (0.002\sum \bm{\tau})^2.$$
+
+\subsection{Visualization and Full Results for Double Pendulum with Varying Contact Environments}
+\label{sup:pendulum_results}
+We provide visualizations of the seven ground configurations and the detailed measured errors in this section.  The seven contact setups include one contact-free scenario where we put the ground far below the pendulum, and six different planar ground settings where the double pendulum is able to make contact with the ground (as shown in Fig.~\ref{fig:pendulum_with_differnt_grounds_full}). We use a single trained \textit{NeRD} model for all contact setups and generate $2048$ passive-motion trajectories of the \textit{Double Pendulum} over a duration of $100$ steps with random initial states and zero joint torques. We report the mean joint-angle errors (in \textit{radians}) over the trajectory in Table \ref{tab:full_pendulum_eval}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\linewidth]{figures/pendulum_full_v3.pdf}
+    
+    \caption{\textbf{Seven \textit{Double Pendulum} contact configurations used for testing \textit{NeRD}'s generalizability across different contact environments.}}
+    \label{fig:pendulum_with_differnt_grounds_full}
+\end{figure}
+
+\begin{table*}[h!]
+\caption{\textbf{Full passive-motion evaluation results on \textit{Double Pendulum}.} For each contact configuration, we report the mean joint-angle error of each joint in radians.}
+\centering
+\label{tab:full_pendulum_eval}
+\fontsize{8.8pt}{11.5pt}\selectfont
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Robot} & \multicolumn{7}{c}{\textbf{Double Pendulum}}  \\ 
+\cmidrule(lr){2-8}
+Contact Configuration & no contact & ground \#1 & ground \#2 & ground \#3 & ground \#4 & ground \#5 & ground \#6 \\
+\midrule
+Joint \#1 Error (\textit{rad}) &  $0.004$ & $0.012$ & $0.008$ & $0.005$ & $0.011$ & $0.029$ & $0.008$ \\
+% \midrule
+Joint \#2 Error (\textit{rad}) & $0.007$ & $0.015$ & $0.011$ & $0.011$ & $0.018$ & $0.056$  & $0.013$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Franka Reach Policy Learning with Joint-Torque Control}
+\label{sup:franka_joint_torque}
+In \S\ref{sec:exp-policy-learning}, we conduct RL policy-learning experiments to show the \textit{NeRD} model's generalizability to low-level controllers, where we apply different low-level controllers on different robots: \textit{joint-torque control} for \textit{Cartpole} and \textit{Ant}, and \textit{joint-position control} for \textit{Franka} and \textit{ANYmal}. To further verify such generalizability, we conduct another experiment here for the \textit{Franka Reach} task, but with \textit{joint-torque control} instead. We use the same task settings (\eg reward, observation) as \textit{Franka Reach} with \textit{joint-position} control, with the only change being the action space of the policy, and use the same \textit{NeRD} model trained for \textit{Franka}. Similarly, we train three policies with different random seeds \textit{entirely} within the \textit{NeRD} simulator for \textit{Franka}, and then evaluate each learned policy over $2048$ trajectories in the \textit{NeRD} and in the ground-truth simulator and compare the obtained rewards and the standard deviations. Similar to the previous experiments, the results show that the trained \textit{NeRD} model can support high-performing policy learning for different low-level controllers, and the \textit{NeRD} simulator and the ground-truth simulator obtain remarkably similar rewards when evaluating the trained policies (\ie $0.11\%$ error), as reported in Table~\ref{tab:franka_policy_eval}.
+
+% \begin{table*}[t!]
+% \caption{Quantitative evaluation of policies trained exclusively in \textit{NeRD} simulators, when deployed in both \textit{NeRD} simulators \textit{and} the ground-truth simulator.}
+% \centering
+% \label{tab:full_policy_eval}
+% % \begin{tiny}
+% {
+% \fontsize{6.8pt}{7.5pt}\selectfont
+% \setlength{\tabcolsep}{4pt}
+% \begin{tabular}{lcccccccc}
+% \toprule
+% \textbf{Robot}    & \textbf{Cartpole}         & \multicolumn{2}{c}{\textbf{Franka}}       & \multicolumn{3}{c}{\textbf{Ant}}                                    & \multicolumn{2}{c}{\textbf{ANYmal}} \\ 
+% \cmidrule(lr){2-2}\cmidrule(lr){3-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}
+% \textbf{Task}     & Swing Up                  & Reach  & Reach               & Running               & Spinning            & Spin Tracking         & Forward Walk       & Sideways Walk \\
+% & & (joint-position control) & (joint-torque) & & & & & \\
+% % \cmidrule(lr){1-8}
+% \midrule
+% % \midrule
+% % GT Reward         & 1212.5 $\pm$ 210.4        & 85.9 $\pm$ 11.8      & 2541.5 $\pm$ 309.1    & 2624.7 $\pm$ 641.0  & 1630.2 $\pm$ 203.1    & 1323.4 $\pm$ 60.5  & 1360.2 $\pm$ 81.2  \\
+% GT Reward         & 1212.5 $\pm$ 210.4        & 89.3 $\pm$ 10.5   & 94.9 $\pm$ 7.8  & 2541.5 $\pm$ 309.1    & 2624.7 $\pm$ 641.0  & 1630.2 $\pm$ 203.1    & 1323.4 $\pm$ 60.5  & 1360.2 $\pm$ 81.2  \\
+% % \midrule
+% \cmidrule(lr){2-2}\cmidrule(lr){3-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}
+% % NeRD Reward       & 1212.6 $\pm$ 210.2        & 91.5 $\pm$ 10.0      & 2649.5 $\pm$ 227.4    & 3076.2 $\pm$ 433.5  & 1670.5 $\pm$ 192.6    & 1323.1 $\pm$ 62.4  & 1359.2 $\pm$ 70.4  \\
+% NeRD Reward       & 1212.6 $\pm$ 210.2        & 91.1 $\pm$ 9.9    & 95.0 $\pm$ 7.8 & 2649.5 $\pm$ 227.4    & 3076.2 $\pm$ 433.5  & 1670.5 $\pm$ 192.6    & 1323.1 $\pm$ 62.4  & 1359.2 $\pm$ 70.4  \\
+% % \midrule
+% \cmidrule(lr){2-2}\cmidrule(lr){3-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}
+% % Reward Err. (\%) & +0.01\%                   & +6.44\%               & +4.25\%               & +17.21\%            & +2.47\%               & -0.02\%            & -0.07\%            \\
+% Reward Err. (\%) & +0.01\%                   & +2.02\%            & +0.11\%  & +4.25\%               & +17.21\%            & +2.47\%               & -0.02\%            & -0.07\%            \\
+% \bottomrule
+% \end{tabular}
+% }
+% % \end{tiny}
+% % \vspace{-1em}
+% \end{table*}
+
+\begin{table*}[t!]
+\caption{Quantitative evaluation of \textit{Franka Reach} policies trained exclusively in \textit{NeRD} simulators, when deployed in the \textit{NeRD} simulator \textit{or} the ground-truth simulator.}
+\centering
+\label{tab:franka_policy_eval}
+% \begin{tiny}
+{
+% \fontsize{6.8pt}{7.5pt}\selectfont
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Robot}    &  \multicolumn{2}{c}{\textbf{Franka}} \\ 
+\cmidrule(lr){2-3}
+\multirow{2}{*}{\textbf{Task}}     &  Reach  & Reach \\
+& (joint-position control) & (joint-torque) \\
+% \cmidrule(lr){1-8}
+\midrule
+GT Reward         & 89.3 $\pm$ 10.5   & 94.9 $\pm$ 7.8 \\
+% \midrule
+\cmidrule(lr){2-3}
+NeRD Reward       & 91.1 $\pm$ 9.9    & 95.0 $\pm$ 7.8 \\
+% \midrule
+\cmidrule(lr){2-3}
+Reward Err. (\%)  & +2.02\%            & +0.11\%    \\
+\bottomrule
+\end{tabular}
+}
+% \end{tiny}
+% \vspace{-1em}
+\end{table*}
+
+\subsection{Details of Cube Tossing Experiment Setups}
+\label{sup:cube_toss}
+We evaluate the fine-tunability of the \textit{NeRD} model using a real-world dataset of cube tossing \cite{pfrommer2021contactnets}, where a cube is tossed with a random initial state and collides with the ground. We first replicate this cube-tossing environment in the Warp simulator by manually tuning the contact and inertia parameters to best replicate the observed dynamics in the dataset. We then generate a dataset comprising $10$K randomly simulated cube-tossing trajectories of length $100$, and pretrain a \textit{NeRD} model from this synthetic dataset. After pretraining, we fine-tune the \textit{NeRD} model on the real-world cube-tossing dataset. The real-world cube-tossing dataset contains $570$ trajectories of varying lengths, corresponding to a total of $60$K dynamics transitions. We split the dataset into $400$ trajectories for training, $85$ trajectories for validation, and $85$ held-out trajectories for testing. To evaluate the fine-tuned model's prediction accuracy, we extract all sub-trajectories of length $80$ (the minimum length of the trajectories in the dataset) from the testing dataset and use the simulator integrated with the fine-tuned \textit{NeRD} model to generate predicted trajectories from the same initial states. We measure the average cube COM position error and average orientation error (in radians) along the trajectory. As a comparison, we also train a \textit{NeRD} model from scratch using only the real-world cube-tossing dataset (\ie no simulation data).
+
+\subsection{Ablation Study}
+\label{sup:ablation}
+The success of \textit{NeRD} relies on several critical design decisions made during development. In this section, we analyze these design decisions through a series of ablation experiments. Specifically, we conduct our study using two evaluation test cases: (1) contact-free passive motion of \textit{Double Pendulum}; and (2) policy evaluation on the \textit{Ant} running task. All ablation models are trained on the same datasets as the corresponding \textit{NeRD} models. 
+
+For test case \#1, we compute the temporally-averaged mean joint-angle error (average error of two joints) of \textit{Double Pendulum} for each ablation model, from $2048$ passive motion trajectories of the \textit{Double Pendulum} over a duration of $100$ steps with random initial states and zero joint torques. Then we normalize the errors by the error of the \textit{NeRD} model, and report the values in Fig. \ref{fig:ablation} (first row).
+
+For test case \#2, we execute the three \textit{Ant} running policies trained in our policy-learning experiments (\S\ref{sec:exp-policy-learning}) and evaluate the average reward obtained using the simulator integrated with each ablation neural dynamics model ($2048$ trajectories for each policy in each ablation neural dynamics model). For each ablation model, we then compute the reward differences compared to the reward obtained in the ground-truth simulator. The reward differences are then normalized by the reward difference of the \textit{NeRD} model and reported in Fig.~\ref{fig:ablation} (second row).
+
+\subsubsection{Network Architecture}
+During development, we found the Transformer architecture to be the most effective for modeling neural robot dynamics. We demonstrate this by comparing it against three other architectures in Fig.~\ref{fig:ablation}(a): \textbf{MLP}: a baseline model that predicts state changes from the robot-centric simulation state of the current step; \textbf{GRU} and \textbf{LSTM}: two RNN architectures that leverage historical state information in their predictions. Although the ground-truth simulator computes the dynamics in a stateless way (\ie the next state only depends on the current state and torques), we found that sequence modeling is important to achieve high accuracy of the neural robot dynamics model. We hypothesize that the high variance of the velocity inputs is a challenge for the model; by including the historical states as input, the neural model is able to infer a smoothed version of velocity and combine it with the actual velocity input for a better prediction. Furthermore, based on the comparisons for policy evaluation on the \textit{Ant} running task, the causal Transformer model helps achieve a reward that is much closer to the ground-truth simulator, compared to RNN architectures.
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=\linewidth]{figures/ablation_v2.pdf}
+    
+    \caption{\textbf{Ablation Study.} We evaluate ablation variants on two test cases: contact-free passive motion of the \textit{Double Pendulum} and policy evaluation on the \textit{Ant} running task. We normalize the errors by the error of \textit{NeRD} ($h=10$). \textbf{(a)} Ablations of different neural network architectures; \textbf{(b)} Ablations of other critical design decisions in \textit{NeRD}. \textbf{(c)} Ablations on the history window size $h$.}
+    \label{fig:ablation}
+\end{figure}
+
+\subsubsection{Hybrid Prediction Framework}
+To demonstrate the effectiveness of our \textit{Hybrid Prediction Framework}, we compare $\textit{NeRD}$ against an \textit{End-to-End} prediction baseline (\textbf{E2E}), which directly maps robot state and action to the next robot state. This \textit{end-to-end} framework is commonly adopted by prior neural simulators for rigid bodies~\cite{li2025roboticworldmodelneural, fussell2021supertrack,heiden2021neuralsim}. We reimplemented it in the Warp simulator. Specifically, in our implementation, the \textbf{E2E} baseline maps the robot state and the joint torques to the relative next robot state, and the robot state is expressed in the world frame (as an \textit{End-to-End} approach is not aware of contact information and has to rely on world-frame state to track the possible collisions in a fixed environment). We replace the action input commonly used in \textit{End-to-End} approaches with joint-torque input so that we can use the same training dataset as \textit{NeRD} for a fair comparison. Fig. \ref{fig:ablation}(b) shows that the \textbf{E2E} baseline has large prediction errors in both test cases. This is because, in the \textit{Double Pendulum} case, the training dataset consists of varying scenarios of contact configurations. However, the \textbf{E2E} state representation without encoding the environment provides insufficient clues to differentiate distinct contact configurations during training, thus resulting in poor performance. In the \textit{Ant} test case, the \textbf{E2E} baseline fails because the world-frame robot state cannot make a reliable prediction when the \textit{Ant} moves far away from the origin and reaches regions outside the range of the training dataset.
+
+\subsubsection{Relative Robot State Prediction}
+The third key design decision is the use of relative robot state prediction, where the model predicts the state difference between the current robot state and the robot state in the next time step, rather than directly predicting the absolute next robot state. Predicting the relative state changes effectively reduces the range of values of the model output, thus stabilizing model training.
+% It encourages the model to focus more on the dynamics learning and avoid from struggling with learning the absolute values. 
+We compare \textit{NeRD} against its \textbf{Abs Pred} variant which predicts the absolute next state of the robot, in Fig.~\ref{fig:ablation}(b). The results in the figure show that even for the low-dimensional system like \textit{Double Pendulum}, predicting the absolute state significantly increases training difficulty and results in a prediction error $26\times$ larger than the error of predicting with relative state changes.
+
+\subsubsection{Robot-Centric State Representation}
+Next, we design experiments to demonstrate the importance of the robot-centric and spatially-invariant simulation state representation.
+% which is introduced with two goals: (1) similar to the relative state prediction, spatially-invariant state parameterization enforces the spatial invariance of the neural robot dynamics model and encourages model training to focus on dynamics prediction rather than figuring out invariance; (2) improve the model's spatial generalizability so that it can accurately predict the dynamics of the robot even when it is physically distant from the training data region. 
+For this ablation study, we train a model with the robot state and contact quantities represented in world space (\textbf{World Frame} variant in Fig.~\ref{fig:ablation}(b)), \ie the loss formulation in Eq.~\ref{eq:original_loss}. As shown in the results, using the world-frame representation does not degrade the model's performance in the \textit{Double Pendulum} case of contact-free motion. This is because the pendulum has a revolute base joint that remains fixed in position, limiting the visited states to the domain covered by the training dataset.
+%since the \textit{Double Pendlum} has a revolute base joint which is static in translation. 
+In contrast, the world-frame representation fails entirely in the \textit{Ant} running task, as the \textit{Ant} moves far away from the origin during running and quickly reaches regions outside the training dataset's distribution, causing the model to make unreliable predictions.
+
+\subsubsection{Model Input and Output Normalization}
+We then show the critical role of normalizing both the inputs and outputs of the neural robot dynamics models. As shown by the \textbf{No Inp. Norm} and \textbf{No Out. Norm} variants in Fig.~\ref{fig:ablation}(b), removing either input or output normalization degrades the performance of the \textit{NeRD} model. This is because the input normalization effectively regularizes the ranges of the inputs to the model, making model training stable and efficient. Meanwhile, output normalization mitigates the dominance of the high-magnitude and high-variance velocity terms in the loss function, balancing prediction accuracy across the different state dimensions.
+
+\subsubsection{History Window Size $h$}
+\textit{NeRD} generally gains slight performance improvements when the history window size $h$ increases. We provide a comparison on history window sizes $h=1$, $h=5$, and $h=10$ in Fig. \ref{fig:ablation}(c). We choose $h=10$, as we find $h=10$ consistently provides stable training and generally achieves the best performance across all tasks in our experiments. Though quite rare, we also notice that further increasing $h$ (\eg $h=20$) will occasionally result in an exploded training loss.
+
+\subsection{Computation Speed of \textit{NeRD}}
+With 512 parallel Ant envs, Warp (with $16$ substeps, which is the number of substeps we use in Warp for generating training data for Ant) achieves 28K FPS, and \textit{NeRD} achieves 46K FPS. We do not view this comparison as definitive, as both Warp and \textit{NeRD} can be further accelerated; however, as a neural model, \textit{NeRD} benefits from continuous advances in AI hardware and community efforts in ML software acceleration (\textit{e.g.,} TensorRT). Additionally, the policy-learning experiments demonstrate that \textit{NeRD} is fast enough for large-scale on-policy RL.

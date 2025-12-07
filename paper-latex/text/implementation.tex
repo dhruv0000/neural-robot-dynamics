@@ -1,0 +1,22 @@
+\section{Implementation}
+\textit{NeRD} is compatible with most articulated rigid-body simulation frameworks, as it uses intermediate quantities commonly computed in a standard simulator. We validate our approach by integrating \textit{NeRD} into a state-of-the-art robotics simulator, NVIDIA's Warp simulator \cite{warp2022}, since Warp's modular design enables implementing \textit{NeRD} as an interchangeable solver module in Python and keeps it transparent to simulation users. We use a GPU-parallelized collision detection algorithm adapted from the one in Warp. %We use the GPU-parallelized collision detection algorithm in Warp.
+
+% \paragraph{Training Datasets}
+\textbf{Training Datasets}\quad 
+We generate the training datasets for \textit{NeRD} in a task-agnostic manner using Warp with the Featherstone solver \cite{feathersone2007}. For each robot instance in our experiments, we collect $100$K random trajectories, each consisting of $100$ timesteps. These trajectories are generated using randomized initial states of the robot, random joint torque sequences within the robot's motor torque limits, and optionally, randomized environment configurations. 
+% As demonstrated in the experiments (\S\ref{sec:experiments}), the \textit{NeRD} models trained from those datasets can be readily used to learn robotic policies for downstream tasks with state distributions that are unseen during \textit{NeRD} training.
+
+% \paragraph{Network and Training Details}
+
+\textbf{Network and Training Details}\quad 
+We model \textit{NeRD} using a causal Transformer architecture, specifically a lightweight implementation of the GPT-2 Transformer \cite{nanoGPT,radford2019language}.
+%% Appendix
+% and repurpose it as a sequential model for robot dynamics. 
+% Past robot-centric simulation states are encoded into embeddings, processed through Transformer blocks with self-attention, and then mapped to latent features from which the robot state difference is predicted as the output. 
+We use a history window size $h = 10$ for all tasks in our experiments. During training, we sample batches of sub-trajectories of length $h$ and train the model using a teacher-forcing approach \cite{Ilya2014sequence}. 
+% Furthermore, we observed that velocity-related variables (\ie $\bm{\phi}, \dot{\bm{q}}$) tend to exhibit significantly higher variances compared to the other robot state components (\ie $\bm{x}, \bm{R}, \bm{q}$). 
+To prevent the loss from being dominated by high-variance velocity terms, 
+% As a result, the loss computed from a uniform weighting scheme is dominated by the velocity prediction terms, harming the model's prediction performance on the non-velocity dimensions. To address this, 
+we normalize the output prediction, using the mean and standard deviation statistics computed from the dataset. 
+Ablation experiments (see Appendix~\ref{sup:ablation}) show that output normalization is critical for improving the accuracy and long-horizon stability of \textit{NeRD}. 
+We also apply normalizations to the model's input to regularize the ranges of the inputs, improving the stability of model training. We report training hyperparameters in the Appendix~\ref{sup:training_details}.

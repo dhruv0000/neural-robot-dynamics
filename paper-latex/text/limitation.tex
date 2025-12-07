@@ -1,0 +1,15 @@
+\section{Limitations and Future Work}
+% mention it simple and foundamental/comprehensive
+In this work, we present Neural Robot Dynamics (\textit{NeRD}), learned robot-specific dynamics models capable of stable and accurate simulation over thousands of time steps. Our neural dynamics models can be fine-tuned from real-world data and generalize across different tasks, environments, and low-level controller configurations.
+
+Although our experiments clearly demonstrate the effectiveness of \textit{NeRD}, several promising directions remain for future research. First, while we evaluate \textit{NeRD} on a 14-DoF \textit{Ant} robot and an 18-DoF \textit{ANYmal} robot, we have yet to test it on some of the most complex robotic systems, such as humanoid robots. These advanced robot designs typically have 20-50 degrees of freedom and complex mechanical structures that are difficult to model analytically and simulate efficiently. Applying \textit{NeRD} on these robots can further highlight the efficiency and accuracy benefits of a neural simulation approach. 
+
+Another interesting direction to explore is the trajectory-sampling strategy for generating the synthetic training dataset. Currently, we adopt a random sampling strategy to generate task-agnostic datasets, ensuring the trained \textit{NeRD} model is not limited to specific state distributions. However, random sampling may become ineffective when the state dimensionality grows, particularly for complex robots such as humanoids. Exploring more effective dataset construction strategies that still preserve task-agnostic characteristics of the datasets and the generalizability of the resulting \textit{NeRD} models is a compelling direction for future research. 
+
+% Furthermore, our current fine-tuning process assumes full observability of the real-world state. 
+Furthermore, our current fine-tuning process assumes we have access to the same state space in the real world as we do in simulation (\ie full robot state, and environment setups for collision detection). However, real-world robot data is often only partially observable due to sensor limitations. Investigating methods to fine-tune a pretrained \textit{NeRD} model from partially observable real-world data is another exciting direction for future research.
+
+% higher-dof robots like humanoids
+% smarter sampling strategy for dataset generation
+% More advanced fine-tuning strategy
+% Finetunig from partially observable real-world data

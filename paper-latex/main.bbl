@@ -1,0 +1,265 @@
+\begin{thebibliography}{52}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Andrychowicz et~al.(2020)Andrychowicz, Baker, Chociej, Jozefowicz, McGrew, Pachocki, Petron, Plappert, Powell, Ray, et~al.]{andrychowicz2020learning}
+O.~M. Andrychowicz, B.~Baker, M.~Chociej, R.~Jozefowicz, B.~McGrew, J.~Pachocki, A.~Petron, M.~Plappert, G.~Powell, A.~Ray, et~al.
+\newblock Learning dexterous in-hand manipulation.
+\newblock \emph{The International Journal of Robotics Research}, 2020.
+
+\bibitem[Chen et~al.(2023)Chen, Tippur, Wu, Kumar, Adelson, and Agrawal]{chen2023visualdex}
+T.~Chen, M.~Tippur, S.~Wu, V.~Kumar, E.~Adelson, and P.~Agrawal.
+\newblock Visual dexterity: In-hand reorientation of novel and complex object shapes.
+\newblock \emph{Science Robotics}, 2023.
+
+\bibitem[Haarnoja et~al.(2024)Haarnoja, Moran, Lever, Huang, Tirumala, Humplik, Wulfmeier, Tunyasuvunakool, Siegel, Hafner, Bloesch, Hartikainen, Byravan, Hasenclever, Tassa, Sadeghi, Batchelor, Casarini, Saliceti, Game, Sreendra, Patel, Gwira, Huber, Hurley, Nori, Hadsell, and Heess]{Haarnoja2024learning}
+T.~Haarnoja, B.~Moran, G.~Lever, S.~H. Huang, D.~Tirumala, J.~Humplik, M.~Wulfmeier, S.~Tunyasuvunakool, N.~Y. Siegel, R.~Hafner, M.~Bloesch, K.~Hartikainen, A.~Byravan, L.~Hasenclever, Y.~Tassa, F.~Sadeghi, N.~Batchelor, F.~Casarini, S.~Saliceti, C.~Game, N.~Sreendra, K.~Patel, M.~Gwira, A.~Huber, N.~Hurley, F.~Nori, R.~Hadsell, and N.~Heess.
+\newblock Learning agile soccer skills for a bipedal robot with deep reinforcement learning.
+\newblock \emph{Science Robotics}, 2024.
+
+\bibitem[Handa et~al.(2023)Handa, Allshire, Makoviychuk, Petrenko, Singh, Liu, Makoviichuk, Van~Wyk, Zhurkevich, Sundaralingam, et~al.]{handa2023dextreme}
+A.~Handa, A.~Allshire, V.~Makoviychuk, A.~Petrenko, R.~Singh, J.~Liu, D.~Makoviichuk, K.~Van~Wyk, A.~Zhurkevich, B.~Sundaralingam, et~al.
+\newblock Dextreme: Transfer of agile in-hand manipulation from simulation to reality.
+\newblock In \emph{2023 IEEE International Conference on Robotics and Automation (ICRA)}, 2023.
+
+\bibitem[Kumar et~al.(2021)Kumar, Fu, Pathak, and Malik]{kumar2021rma}
+A.~Kumar, Z.~Fu, D.~Pathak, and J.~Malik.
+\newblock Rma: Rapid motor adaptation for legged robots.
+\newblock 2021.
+
+\bibitem[Lee et~al.(2020)Lee, Hwangbo, Wellhausen, Koltun, and Hutter]{lee2020learning}
+J.~Lee, J.~Hwangbo, L.~Wellhausen, V.~Koltun, and M.~Hutter.
+\newblock Learning quadrupedal locomotion over challenging terrain.
+\newblock \emph{Science robotics}, 2020.
+
+\bibitem[Tang et~al.(2024)Tang, Akinola, Xu, Wen, Handa, Van~Wyk, Fox, S.~Sukhatme, Ramos, and Narang]{tang2024automate}
+B.~Tang, I.~Akinola, J.~Xu, B.~Wen, A.~Handa, K.~Van~Wyk, D.~Fox, G.~S.~Sukhatme, F.~Ramos, and Y.~Narang.
+\newblock Automate: Specialist and generalist assembly policies over diverse geometries.
+\newblock In \emph{Robotics: Science and Systems}, 2024.
+
+\bibitem[Funk et~al.(2021)Funk, Schaff, Madan, Yoneda, De~Jesus, Watson, Gordon, Widmaier, Bauer, Srinivasa, et~al.]{funk2021benchmarking}
+N.~Funk, C.~Schaff, R.~Madan, T.~Yoneda, J.~U. De~Jesus, J.~Watson, E.~K. Gordon, F.~Widmaier, S.~Bauer, S.~S. Srinivasa, et~al.
+\newblock Benchmarking structured policies and policy optimization for real-world dexterous object manipulation.
+\newblock \emph{IEEE Robotics and Automation Letters}, 2021.
+
+\bibitem[Gu et~al.(2023)Gu, Xiang, Li, Ling, Liu, Mu, Tang, Tao, Wei, Yao, Yuan, Xie, Huang, Chen, and Su]{gu2023maniskill}
+J.~Gu, F.~Xiang, X.~Li, Z.~Ling, X.~Liu, T.~Mu, Y.~Tang, S.~Tao, X.~Wei, Y.~Yao, X.~Yuan, P.~Xie, Z.~Huang, R.~Chen, and H.~Su.
+\newblock Maniskill2: A unified benchmark for generalizable manipulation skills.
+\newblock In \emph{The Eleventh International Conference on Learning Representations}, 2023.
+
+\bibitem[Li et~al.(2024)Li, Hsu, Gu, Pertsch, Mees, Walke, Fu, Lunawat, Sieh, Kirmani, Levine, Wu, Finn, Su, Vuong, and Xiao]{li24simpler}
+X.~Li, K.~Hsu, J.~Gu, K.~Pertsch, O.~Mees, H.~R. Walke, C.~Fu, I.~Lunawat, I.~Sieh, S.~Kirmani, S.~Levine, J.~Wu, C.~Finn, H.~Su, Q.~Vuong, and T.~Xiao.
+\newblock Evaluating real-world robot manipulation policies in simulation.
+\newblock \emph{arXiv preprint arXiv:2405.05941}, 2024.
+
+\bibitem[Liu et~al.(2021)Liu, Liu, Qin, Xiang, Gou, Xin, Roa, Calli, Su, Sun, et~al.]{liu2021ocrtoc}
+Z.~Liu, W.~Liu, Y.~Qin, F.~Xiang, M.~Gou, S.~Xin, M.~A. Roa, B.~Calli, H.~Su, Y.~Sun, et~al.
+\newblock Ocrtoc: A cloud-based competition and benchmark for robotic grasping and manipulation.
+\newblock \emph{IEEE Robotics and Automation Letters}, 2021.
+
+\bibitem[Du et~al.(2016)Du, Schulz, Zhu, Bickel, and Matusik]{du2016_copter}
+T.~Du, A.~Schulz, B.~Zhu, B.~Bickel, and W.~Matusik.
+\newblock Computational multicopter design.
+\newblock \emph{ACM Trans. Graph.}, 2016.
+
+\bibitem[Li et~al.(2023)Li, Antonova, Sadigh, and Bohg]{li2023tool}
+M.~Li, R.~Antonova, D.~Sadigh, and J.~Bohg.
+\newblock Learning tool morphology for contact-rich manipulation tasks with differentiable simulation.
+\newblock In \emph{2023 IEEE International Conference on Robotics and Automation (ICRA)}, 2023.
+
+\bibitem[Xu et~al.(2021)Xu, Chen, Zlokapa, Foshey, Matusik, Sueda, and Agrawal]{xu2021design}
+J.~Xu, T.~Chen, L.~Zlokapa, M.~Foshey, W.~Matusik, S.~Sueda, and P.~Agrawal.
+\newblock {An End-to-End Differentiable Framework for Contact-Aware Robot Design}.
+\newblock In \emph{Proceedings of Robotics: Science and Systems}, 2021.
+
+\bibitem[Pfrommer et~al.(2021)Pfrommer, Halm, and Posa]{pfrommer2021contactnets}
+S.~Pfrommer, M.~Halm, and M.~Posa.
+\newblock Contactnets: Learning discontinuous contact dynamics with smooth, implicit representations.
+\newblock In \emph{Proceedings of the 2020 Conference on Robot Learning}, 2021.
+
+\bibitem[Hoffman et~al.(2025)Hoffman, Cheng, Li, and Coros]{hoffman2025learning}
+B.~Hoffman, J.~Cheng, C.~Li, and S.~Coros.
+\newblock Learning more with less: Sample efficient dynamics learning and model-based rl for loco-manipulation.
+\newblock \emph{arXiv preprint arXiv:2501.10499}, 2025.
+
+\bibitem[Ajay et~al.(2018)Ajay, Wu, Fazeli, Bauza, Kaelbling, Tenenbaum, and Rodriguez]{ajay2018augmenting}
+A.~Ajay, J.~Wu, N.~Fazeli, M.~Bauza, L.~P. Kaelbling, J.~B. Tenenbaum, and A.~Rodriguez.
+\newblock Augmenting physical simulators with stochastic neural networks: Case study of planar pushing and bouncing.
+\newblock In \emph{2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 2018.
+
+\bibitem[Zeng et~al.(2020)Zeng, Song, Lee, Rodriguez, and Funkhouser]{zeng2020tossingbot}
+A.~Zeng, S.~Song, J.~Lee, A.~Rodriguez, and T.~Funkhouser.
+\newblock Tossingbot: Learning to throw arbitrary objects with residual physics.
+\newblock \emph{IEEE Transactions on Robotics}, 2020.
+
+\bibitem[Janner et~al.(2019)Janner, Fu, Zhang, and Levine]{janner2019mbpo}
+M.~Janner, J.~Fu, M.~Zhang, and S.~Levine.
+\newblock When to trust your model: Model-based policy optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2019.
+
+\bibitem[Li et~al.(2025)Li, Krause, and Hutter]{li2025roboticworldmodelneural}
+C.~Li, A.~Krause, and M.~Hutter.
+\newblock Robotic world model: A neural network simulator for robust policy optimization in robotics, 2025.
+
+\bibitem[Andriluka et~al.(2024)Andriluka, Tabanpour, Freeman, and Sminchisescu]{andriluka2024neural}
+M.~Andriluka, B.~Tabanpour, C.~D. Freeman, and C.~Sminchisescu.
+\newblock Learned neural physics simulation for articulated 3d human pose reconstruction.
+\newblock In \emph{Computer Vision – ECCV 2024: 18th European Conference, Proceedings, Part LXXXIV}, 2024.
+
+\bibitem[Fussell et~al.(2021)Fussell, Bergamin, and Holden]{fussell2021supertrack}
+L.~Fussell, K.~Bergamin, and D.~Holden.
+\newblock Supertrack: motion tracking for physically simulated characters using supervised learning.
+\newblock \emph{ACM Trans. Graph.}, 40\penalty0 (6), 2021.
+
+\bibitem[Hansen et~al.(2022)Hansen, Wang, and Su]{hansen2022temporal}
+N.~Hansen, X.~Wang, and H.~Su.
+\newblock Temporal difference learning for model predictive control.
+\newblock In \emph{International Conference on Machine Learning, PMLR}, 2022.
+
+\bibitem[Macklin(2022)]{warp2022}
+M.~Macklin.
+\newblock Warp: A high-performance python framework for gpu simulation and graphics.
+\newblock \url{https://github.com/nvidia/warp}, 2022.
+
+\bibitem[Bertiche et~al.(2022)Bertiche, Madadi, and Escalera]{bertiche2022cloth}
+H.~Bertiche, M.~Madadi, and S.~Escalera.
+\newblock Neural cloth simulation.
+\newblock \emph{ACM Trans. Graph.}, 2022.
+
+\bibitem[Jin et~al.(2024)Jin, Omens, Geng, Teran, Kumar, Tashiro, and Fedkiw]{jin2024neural}
+Y.~Jin, D.~Omens, Z.~Geng, J.~Teran, A.~Kumar, K.~Tashiro, and R.~Fedkiw.
+\newblock A neural-network-based approach for loose-fitting clothing.
+\newblock \emph{arXiv preprint arXiv:2404.16896}, 2024.
+
+\bibitem[Pfaff et~al.(2021)Pfaff, Fortunato, Sanchez-Gonzalez, and Battaglia]{pfaff2021learning}
+T.~Pfaff, M.~Fortunato, A.~Sanchez-Gonzalez, and P.~W. Battaglia.
+\newblock Learning mesh-based simulation with graph networks.
+\newblock In \emph{International Conference on Learning Representations}, 2021.
+
+\bibitem[Ladick{\`y} et~al.(2015)Ladick{\`y}, Jeong, Solenthaler, Pollefeys, and Gross]{ladicky2015data}
+L.~Ladick{\`y}, S.~Jeong, B.~Solenthaler, M.~Pollefeys, and M.~Gross.
+\newblock Data-driven fluid simulations using regression forests.
+\newblock \emph{ACM Transactions on Graphics (TOG)}, 2015.
+
+\bibitem[Sanchez-Gonzalez et~al.(2020)Sanchez-Gonzalez, Godwin, Pfaff, Ying, Leskovec, and Battaglia]{sanchezgonzalez2020learning}
+A.~Sanchez-Gonzalez, J.~Godwin, T.~Pfaff, R.~Ying, J.~Leskovec, and P.~W. Battaglia.
+\newblock Learning to simulate complex physics with graph networks.
+\newblock In \emph{International Conference on Machine Learning}, 2020.
+
+\bibitem[Li et~al.(2024)Li, Gao, Dai, Li, Hao, and Qin]{li2024mpmnet}
+J.~Li, Y.~Gao, J.~Dai, S.~Li, A.~Hao, and H.~Qin.
+\newblock Mpmnet: A data-driven mpm framework for dynamic fluid-solid interaction.
+\newblock \emph{IEEE Transactions on Visualization and Computer Graphics}, 2024.
+
+\bibitem[Li et~al.(2023)Li, Qiao, Chen, Jatavallabhula, Lin, Jiang, and Gan]{li2023pac}
+X.~Li, Y.-L. Qiao, P.~Y. Chen, K.~M. Jatavallabhula, M.~Lin, C.~Jiang, and C.~Gan.
+\newblock Pac-nerf: Physics augmented continuum neural radiance fields for geometry-agnostic system identification.
+\newblock \emph{International Conference on Learning Representations (ICLR)}, 2023.
+
+\bibitem[Jiang et~al.(2022)Jiang, Sun, and Liu]{jiang2022contact}
+Y.~Jiang, J.~Sun, and C.~K. Liu.
+\newblock Data-augmented contact model for rigid body simulation.
+\newblock In \emph{Proceedings of The 4th Annual Learning for Dynamics and Control Conference}, 2022.
+
+\bibitem[Allen et~al.(2023{\natexlab{a}})Allen, Guevara, Rubanova, Stachenfeld, Sanchez-Gonzalez, Battaglia, and Pfaff]{allen2023contact}
+K.~R. Allen, T.~L. Guevara, Y.~Rubanova, K.~Stachenfeld, A.~Sanchez-Gonzalez, P.~Battaglia, and T.~Pfaff.
+\newblock Graph network simulators can learn discontinuous, rigid contact dynamics.
+\newblock In \emph{Proceedings of The 6th Conference on Robot Learning}, 2023{\natexlab{a}}.
+
+\bibitem[Allen et~al.(2023{\natexlab{b}})Allen, Rubanova, Lopez-Guevara, Whitney, Sanchez-Gonzalez, Battaglia, and Pfaff]{allen2023learning}
+K.~R. Allen, Y.~Rubanova, T.~Lopez-Guevara, W.~F. Whitney, A.~Sanchez-Gonzalez, P.~Battaglia, and T.~Pfaff.
+\newblock Learning rigid dynamics with face interaction graph networks.
+\newblock In \emph{The Eleventh International Conference on Learning Representations}, 2023{\natexlab{b}}.
+
+\bibitem[Hafner et~al.(2020)Hafner, Lillicrap, Ba, and Norouzi]{Hafner2020Dream}
+D.~Hafner, T.~Lillicrap, J.~Ba, and M.~Norouzi.
+\newblock Dream to control: Learning behaviors by latent imagination.
+\newblock In \emph{International Conference on Learning Representations}, 2020.
+
+\bibitem[Hafner et~al.(2023)Hafner, Pasukonis, Ba, and Lillicrap]{hafner2023dreamerv3}
+D.~Hafner, J.~Pasukonis, J.~Ba, and T.~Lillicrap.
+\newblock Mastering diverse domains through world models.
+\newblock \emph{arXiv preprint arXiv:2301.04104}, 2023.
+
+\bibitem[Hansen et~al.(2024)Hansen, Su, and Wang]{hansen2024tdmpc2}
+N.~Hansen, H.~Su, and X.~Wang.
+\newblock Td-mpc2: Scalable, robust world models for continuous control, 2024.
+
+\bibitem[Moerland et~al.(2023)Moerland, Broekens, Plaat, Jonker, et~al.]{moerland2023mbrl}
+T.~M. Moerland, J.~Broekens, A.~Plaat, C.~M. Jonker, et~al.
+\newblock Model-based reinforcement learning: A survey.
+\newblock \emph{Foundations and Trends{\textregistered} in Machine Learning}, 2023.
+
+\bibitem[Sanchez-Gonzalez et~al.(2018)Sanchez-Gonzalez, Heess, Springenberg, Merel, Riedmiller, Hadsell, and Battaglia]{sanchez2018graph}
+A.~Sanchez-Gonzalez, N.~Heess, J.~T. Springenberg, J.~Merel, M.~Riedmiller, R.~Hadsell, and P.~Battaglia.
+\newblock Graph networks as learnable physics engines for inference and control.
+\newblock In \emph{International conference on machine learning}, 2018.
+
+\bibitem[Raissi et~al.(2019)Raissi, Perdikaris, and Karniadakis]{raissi2019pinn}
+M.~Raissi, P.~Perdikaris, and G.~Karniadakis.
+\newblock Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations.
+\newblock \emph{Journal of Computational Physics}, 2019.
+
+\bibitem[Cuomo et~al.(2022)Cuomo, Di~Cola, Giampaolo, Rozza, Raissi, and Piccialli]{cuomo2022pinn}
+S.~Cuomo, V.~S. Di~Cola, F.~Giampaolo, G.~Rozza, M.~Raissi, and F.~Piccialli.
+\newblock Scientific machine learning through physics–informed neural networks: Where we are and what’s next.
+\newblock 2022.
+
+\bibitem[Heiden et~al.(2021)Heiden, Millard, Coumans, Sheng, and Sukhatme]{heiden2021neuralsim}
+E.~Heiden, D.~Millard, E.~Coumans, Y.~Sheng, and G.~S. Sukhatme.
+\newblock Neuralsim: Augmenting differentiable simulators with neural networks.
+\newblock In \emph{2021 IEEE International Conference on Robotics and Automation (ICRA)}, 2021.
+
+\bibitem[Kim et~al.(2019)Kim, Yoon, Son, and Lee]{kim2019contact}
+M.~Kim, J.~Yoon, D.~Son, and D.~Lee.
+\newblock Data-driven contact clustering for robot simulation.
+\newblock In \emph{2019 International Conference on Robotics and Automation (ICRA)}, 2019.
+
+\bibitem[Son and Kim(2023)]{son2023local}
+D.~Son and B.~Kim.
+\newblock Local object crop collision network for efficient simulation of non-convex objects in gpu-based simulators.
+\newblock \emph{arXiv preprint arXiv:2304.09439}, 2023.
+
+\bibitem[Featherstone(2007)]{feathersone2007}
+R.~Featherstone.
+\newblock \emph{Rigid Body Dynamics Algorithms}.
+\newblock Springer-Verlag, 2007.
+
+\bibitem[Karpathy(2023)]{nanoGPT}
+A.~Karpathy.
+\newblock {nanoGPT}, 2023.
+\newblock URL \url{https://github.com/karpathy/nanoGPT}.
+
+\bibitem[Radford et~al.(2019)Radford, Wu, Child, Luan, Amodei, Sutskever, et~al.]{radford2019language}
+A.~Radford, J.~Wu, R.~Child, D.~Luan, D.~Amodei, I.~Sutskever, et~al.
+\newblock Language models are unsupervised multitask learners.
+\newblock \emph{OpenAI blog}, 2019.
+
+\bibitem[Sutskever et~al.(2014)Sutskever, Vinyals, and Le]{Ilya2014sequence}
+I.~Sutskever, O.~Vinyals, and Q.~V. Le.
+\newblock Sequence to sequence learning with neural networks.
+\newblock In \emph{Proceedings of the 28th International Conference on Neural Information Processing Systems - Volume 2}, 2014.
+
+\bibitem[Shinbrot et~al.(1992)Shinbrot, Grebogi, Wisdom, and Yorke]{shinbrot1992chaos}
+T.~Shinbrot, C.~Grebogi, J.~Wisdom, and J.~A. Yorke.
+\newblock Chaos in a double pendulum.
+\newblock \emph{American Journal of Physics}, 1992.
+
+\bibitem[Hutter et~al.(2016)Hutter, Gehring, Jud, Lauber, Bellicoso, Tsounis, Hwangbo, Bodie, Fankhauser, Bloesch, Diethelm, Bachmann, Melzer, and Hoepflinger]{hutter2016anymal}
+M.~Hutter, C.~Gehring, D.~Jud, A.~Lauber, C.~D. Bellicoso, V.~Tsounis, J.~Hwangbo, K.~Bodie, P.~Fankhauser, M.~Bloesch, R.~Diethelm, S.~Bachmann, A.~Melzer, and M.~Hoepflinger.
+\newblock Anymal - a highly mobile and dynamic quadrupedal robot.
+\newblock In \emph{2016 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 2016.
+
+\bibitem[Schulman et~al.(2017)Schulman, Wolski, Dhariwal, Radford, and Klimov]{schulman2017proximal}
+J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford, and O.~Klimov.
+\newblock Proximal policy optimization algorithms.
+\newblock \emph{arXiv preprint arXiv:1707.06347}, 2017.
+
+\bibitem[Makoviychuk et~al.(2021)Makoviychuk, Wawrzyniak, Guo, Lu, Storey, Macklin, Hoeller, Rudin, Allshire, Handa, and State]{makoviychuk2021isaac}
+V.~Makoviychuk, L.~Wawrzyniak, Y.~Guo, M.~Lu, K.~Storey, M.~Macklin, D.~Hoeller, N.~Rudin, A.~Allshire, A.~Handa, and G.~State.
+\newblock Isaac gym: High performance gpu-based physics simulation for robot learning, 2021.
+
+\end{thebibliography}
