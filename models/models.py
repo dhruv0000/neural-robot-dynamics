@@ -105,21 +105,28 @@ class ModelMixedInput(nn.Module):
             self.is_rnn = False
             self.rnn = None
 
-        if novelty == 'mamba':
+        if novelty in ['mamba', 'mamba-3', 'mamba-6']:
             self.is_transformer = False
             self.transformer_model = None
+            
+            # Determine layer count based on novelty type
+            if novelty == 'mamba-3':
+                n_layer = 3
+            elif novelty == 'mamba-6':
+                n_layer = 6
+            else:  # 'mamba' defaults to 6 for backward compatibility
+                n_layer = network_cfg['transformer']['n_layer']
             
             # Use transformer config for mamba for now, or add specific mamba config
             mamba_cfg = MambaConfig(
                 d_model=network_cfg['transformer']['n_embd'],
-                n_layer=network_cfg['transformer']['n_layer'],
+                n_layer=n_layer,
                 d_state=16, # Default
                 expand=2,   # Default
                 vocab_size=self.feature_dim,
             )
             self.mamba_model = Mamba(mamba_cfg)
             self.mamba_model.to(self.device)
-            self.is_mamba = True
             self.is_mamba = True
             self.feature_dim = mamba_cfg.d_model
 

@@ -34,7 +34,7 @@ def add_additional_params(parser):
     parser.add_argument(
         '--cfg-overrides', default="", type=str)
     parser.add_argument(
-        '--novelty', default=None, choices=['mamba', 'unroll', 'jamba'], type=str)
+        '--novelty', default=None, choices=['mamba', 'mamba-3', 'mamba-6', 'unroll', 'jamba'], type=str)
     parser.add_argument(
         '--sample-sequence-length', default=None, type=int)
     parser.add_argument(
