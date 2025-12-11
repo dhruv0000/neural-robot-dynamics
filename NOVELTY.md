@@ -4,10 +4,11 @@ The original paper uses a "lightweight GPT-2" (Transformer). While effective, Tr
 * **Why it works:** SSMs offer **linear scaling** with sequence length and faster inference (recurrence) while maintaining the long-range dependency modeling of Transformers. This fits perfectly with the goal of a "fast, efficient neural simulator."
 * **Hypothesis:** You could demonstrate that a Mamba-based NeRD is $2\times$ faster at inference time with equal or better stability than the Transformer baseline.
 
-### 2. Training Stability: Implement "Temporal Unrolling" (Push-forward Loss)
-The paper primarily uses "teacher forcing" (predicting $t+1$ given ground truth at $t$). This can lead to "exposure bias" where the model drifts when running on its own predictions.
-* **The Novelty:** Implement **multi-step loss** (or "temporal unrolling") during training. Instead of just predicting $t+1$, force the model to predict $t+1 \dots t+10$ autoregressively during training and backpropagate through the entire chain.
-* **Why it works:** This directly trains the model to recover from its own small errors, significantly improving the "stability horizon" (e.g., from 1,000 steps to 5,000 steps).
+### 2. Parameter Efficiency: Mamba Layer Ablation (Mamba-3 vs Mamba-6)
+To rigorously test the parameter efficiency of State Space Models, we implemented two distinct variants of the Mamba architecture:
+* **Mamba-6:** A 6-layer configuration (~1.52M parameters), serving as the direct architectural counterpart to the baseline Transformer.
+* **Mamba-3:** A lightweight 3-layer configuration (~761K parameters).
+* **The Novelty:** By comparing `mamba-3` against `mamba-6` and the baseline, we aim to demonstrate that SSMs can achieve competitive dynamics modeling performance with **significantly fewer parameters** (approx. 50% reduction vs Mamba-6 and 72% reduction vs Transformer). This highlights the superior inductive bias of SSMs for continuous physics simulation.
 
 ### 3. Architectural Upgrade: Hybrid Jamba Architecture (Mamba + Transformer)
 While Mamba offers efficiency, Transformers excel at in-context learning and high-fidelity recall. A pure Mamba model might struggle with complex, non-Markovian dynamics that a Transformer captures easily.
